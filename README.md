@@ -1,5 +1,8 @@
 # The Measurement Axioms
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21763430.svg)](https://doi.org/10.5281/zenodo.21763430)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 **A governance system that returned `safe` may have checked nothing.**
 
 A governance verdict is a measurement of a claim about a system. A measurement
@@ -76,4 +79,19 @@ names has not earned the reader's attention.
 
 ## Citing
 
-See [`CITATION.cff`](./CITATION.cff). Licence: CC BY 4.0.
+```
+Abak, A. T. (2026). The Measurement Axioms: A Doctrine and Specification for
+Governance Verdict Validity (1.0.0). Zenodo. https://doi.org/10.5281/zenodo.21763430
+```
+
+Machine-readable metadata: [`CITATION.cff`](./CITATION.cff).
+
+Two DOIs, and the difference matters when citing:
+
+| | |
+|---|---|
+| **10.5281/zenodo.21763430** | Concept DOI — resolves to the most recent version. Cite this unless you need a specific edition |
+| **10.5281/zenodo.21763431** | Version DOI — the 1.0.0 baseline edition, fixed |
+
+Licence: CC BY 4.0. It grants no right to describe an implementation as
+conformant.

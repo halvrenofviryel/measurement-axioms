@@ -9,8 +9,19 @@ authors:
     family-names: Abak
     orcid: https://orcid.org/0009-0002-3718-4010
 version: 1.0.0
+doi: 10.5281/zenodo.21763430
 date-released: '2026-08-02'
 license: CC-BY-4.0
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21763430
+    description: >-
+      Concept DOI — always resolves to the most recent version.
+  - type: doi
+    value: 10.5281/zenodo.21763431
+    description: >-
+      Version DOI — the 1.0.0 baseline edition specifically.
+repository-code: 'https://github.com/halvrenofviryel/measurement-axioms'
 abstract: >-
   A governance verdict is a measurement of a claim about a system, and a
   measurement that was not taken must not be reported as one that passed. The
