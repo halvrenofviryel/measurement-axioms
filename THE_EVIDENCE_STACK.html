@@ -144,6 +144,13 @@ and it is why the rules are a separate artefact.</p>
 <p><strong>The doctrine defines. Phionyx governs. The MCP gates challenge and observe.
 AIREP records.</strong></p>
 </blockquote>
+<p>And a fifth that is not in the column, because it is applied <strong>to</strong>
+the column rather than being a stage in it: <a href="https://doi.org/10.5281/zenodo.21631868">CDE-12</a>
+rates what a record lets a later reader establish — twelve criteria, five values,
+an evidence tier on every cell, applied to the record any layer above produces.</p>
+<blockquote>
+<p><strong>CDE-12 rates.</strong></p>
+</blockquote>
 <hr />
 <h2>III. What each piece is, precisely</h2>
 <h3>The Measurement Axioms — a design discipline</h3>
@@ -203,6 +210,39 @@ another name for AIREP, and AIREP is not Phionyx&rsquo;s format.</p>
 specification</strong> — not a conformant one. Our own audit found the exporter
 violating four of AIREP&rsquo;s MUST requirements on its default path.</p>
 </blockquote>
+<h3>CDE-12 — an instrument, not a layer</h3>
+<p><em>Added 2026-08-02, after the v1.0 release of the doctrine. The Zenodo
+deposit of v1.0 predates this section; the repository is the current text.</em></p>
+<p><a href="https://doi.org/10.5281/zenodo.21631868">CDE-12</a> — <em>Control-Delivery
+Evidence</em>, v0.2, 27 July 2026 — is an instrument for reporting what a system
+can and cannot <strong>record</strong> about a control decision and its fate.
+Twelve criteria, a five-value scale, and an evidence tier on every cell.</p>
+<p><strong>It measures records, not behaviour.</strong> A system may enforce
+perfectly and score badly; that is not a contradiction. The question throughout
+is what a later reader can establish from what the system wrote down.</p>
+<p>That makes it a different kind of thing from everything else on this page:</p>
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td>The doctrine</td><td>says when a verdict counts as a measurement</td></tr>
+<tr><td>The runtime, the gates, RGE, AIREP</td><td>produce decisions and records</td></tr>
+<tr><td><strong>CDE-12</strong></td><td><strong>rates the record somebody else produced</strong></td></tr>
+</tbody>
+</table>
+<p><strong>It applies to systems other than ours.</strong> Nothing in CDE-12 is
+Phionyx-shaped: its subject is any artifact that governs or records agent actions
+at runtime and produces a record intended for later inspection. That is why it
+sits beside the column rather than inside it.</p>
+<p><strong>It is the missing half of this doctrine's own weakest claim.</strong>
+The self-audit reports <code>independent_reproducibility: NOT_MEASURED</code>, and
+CDE-12's design intent is exactly the remedy: <em>two people applying this to the
+same system, without speaking to each other, should reach the same cells.</em> An
+assessment two readers can reach independently is what turns a source reading into
+a measurement.</p>
+<p><strong>Version asymmetry, stated.</strong> CDE-12 is at v0.2 and this doctrine
+is at v1.0. They are not co-equal releases and should not be cited as though they
+were.</p>
+<hr />
 <h3>AIREP — a neutral protocol</h3>
 <p><code>ai-runtime-evidence-protocol</code>. One signed, hash-chained, canonical-JSON record
 per decision, checkable offline by someone with neither the runtime nor its

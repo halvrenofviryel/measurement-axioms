@@ -77,6 +77,20 @@ Four verbs:
 > **The doctrine defines. Phionyx governs. The MCP gates challenge and observe.
 > AIREP records.**
 
+And a fifth that is not in the column, because it is applied **to** the column
+rather than being a stage in it:
+
+```
+   ┌─────────────────────────────────────────────┐
+   │  CDE-12 — Control-Delivery Evidence         │
+   │  rates what a record lets a later reader     │──▶ applied to the
+   │  establish. Twelve criteria, five values,    │    record any layer
+   │  an evidence tier on every cell.             │    above produces
+   └─────────────────────────────────────────────┘
+```
+
+> **CDE-12 rates.**
+
 ---
 
 ## III. What each piece is, precisely
@@ -124,6 +138,50 @@ another name for AIREP, and AIREP is not Phionyx's format.
 > **RGE is AIREP's first reference producer, currently being aligned against the
 > specification** — not a conformant one. Our own audit found the exporter
 > violating four of AIREP's MUST requirements on its default path.
+
+### CDE-12 — an instrument, not a layer
+
+*Added 2026-08-02, after the v1.0 release of the doctrine. The Zenodo deposit
+of v1.0 predates this section; the repository is the current text.*
+
+[CDE-12](https://doi.org/10.5281/zenodo.21631868) — *Control-Delivery
+Evidence*, v0.2, 27 July 2026 — is an instrument for reporting what a system
+can and cannot **record** about a control decision and its fate. Twelve
+criteria, a five-value scale, and an evidence tier on every cell.
+
+**It measures records, not behaviour.** A system may enforce perfectly and
+score badly; that is not a contradiction. The question throughout is what a
+later reader can establish from what the system wrote down.
+
+That makes it a different kind of thing from everything else on this page, and
+the difference is worth stating rather than leaving to be inferred:
+
+| | |
+|---|---|
+| The doctrine | says when a verdict counts as a measurement |
+| The runtime, the gates, RGE, AIREP | produce decisions and records |
+| **CDE-12** | **rates the record somebody else produced** |
+
+Two consequences follow.
+
+**It applies to systems other than ours.** Nothing in CDE-12 is Phionyx-shaped:
+its subject is any artifact that governs or records agent actions at runtime and
+produces a record intended for later inspection. That is deliberate, and it is
+the reason it sits beside the column rather than inside it.
+
+**It is the missing half of this doctrine's own weakest claim.** The self-audit
+reports `independent_reproducibility: NOT_MEASURED`, and its design intent is
+exactly the remedy: *two people applying this to the same system, without
+speaking to each other, should reach the same cells. Where they cannot, the
+criterion is defective and the defect is ours.* An assessment that two readers
+can reach independently is what turns a source reading into a measurement.
+
+**Version asymmetry, stated.** CDE-12 is at v0.2 and this doctrine is at v1.0.
+They are not co-equal releases and should not be cited as though they were. The
+instrument is published, DOI'd and usable; it has not been through the freezing
+and conformance-suite discipline the specification has.
+
+---
 
 ### AIREP — a neutral protocol
 
