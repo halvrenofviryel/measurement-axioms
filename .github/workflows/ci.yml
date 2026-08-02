@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Frozen artefacts and conformance suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip pytest pyyaml jsonschema
+
+      # A frozen version that cannot be checked is a claim about itself. This
+      # step runs first on purpose: if an artefact changed, the suite below
+      # would be testing something other than what the manifest describes.
+      - name: Verify the frozen artefacts
+        working-directory: spec/v1.0
+        run: sha256sum -c CHECKSUMS.sha256
+
+      - name: Run the conformance and specification suites
+        run: python -m pytest tests/ -q

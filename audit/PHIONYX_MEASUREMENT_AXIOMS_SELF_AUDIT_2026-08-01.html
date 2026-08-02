@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phionyx self-audit against The Measurement Axioms</title>
+<style>
+:root {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --rule: #e2ded7;
+  --accent: #8a3324; --code-bg: #f2efe9; --table-head: #f5f2ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16151a; --fg: #e6e3dd; --muted: #98948c; --rule: #302e34;
+    --accent: #e08a6e; --code-bg: #201f25; --table-head: #1e1d23;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16151a; --fg: #e6e3dd; --muted: #98948c; --rule: #302e34;
+  --accent: #e08a6e; --code-bg: #201f25; --table-head: #1e1d23;
+}
+:root[data-theme="light"] {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --rule: #e2ded7;
+  --accent: #8a3324; --code-bg: #f2efe9; --table-head: #f5f2ec;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 17px/1.68 Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
+  margin: 0; padding: 3.5rem 1.25rem 6rem;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 44rem; margin: 0 auto; }
+h1, h2, h3 {
+  font-family: "Helvetica Neue", Inter, system-ui, sans-serif;
+  line-height: 1.25; letter-spacing: -0.014em;
+}
+h1 { font-size: 2.3rem; margin: 0 0 .4rem; font-weight: 700; }
+h2 {
+  font-size: 1.42rem; margin: 3.4rem 0 1rem; font-weight: 650;
+  padding-top: 1.6rem; border-top: 1px solid var(--rule);
+}
+h3 { font-size: 1.12rem; margin: 2.2rem 0 .7rem; font-weight: 650; color: var(--muted); }
+h1 + h3 { margin-top: 0; font-size: 1.22rem; color: var(--fg); font-weight: 500; }
+p, li { overflow-wrap: break-word; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+strong { font-weight: 680; }
+blockquote {
+  margin: 1.5rem 0; padding: .2rem 0 .2rem 1.25rem;
+  border-left: 3px solid var(--accent); color: var(--fg);
+  font-size: 1.06em; font-style: italic;
+}
+blockquote p { margin: .45rem 0; }
+code {
+  background: var(--code-bg); padding: .12em .38em; border-radius: 3px;
+  font: .86em/1.5 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
+pre {
+  background: var(--code-bg); padding: .9rem 1rem; border-radius: 5px;
+  overflow-x: auto; margin: 1.4rem 0; line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: .84em; white-space: pre; }
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+table {
+  border-collapse: collapse; width: 100%; font-size: .93rem;
+  font-family: "Helvetica Neue", Inter, system-ui, sans-serif;
+}
+th, td { text-align: left; padding: .58rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { background: var(--table-head); font-weight: 650; }
+ul, ol { padding-left: 1.4rem; }
+li { margin: .42rem 0; }
+em { color: var(--fg); }
+@media (max-width: 34rem) {
+  body { padding: 2rem 1rem 4rem; font-size: 16px; }
+  h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Phionyx self-audit against The Measurement Axioms</h1>
+<p><strong>Audit date:</strong> 1 August 2026
+<strong>Subject:</strong> the Phionyx governance runtime and its published assurance artefacts
+<strong>Method:</strong> source reading against the axioms, properties and principles of
+<a href="./THE_MEASUREMENT_AXIOMS.md">The Measurement Axioms</a></p>
+<pre><code class="language-yaml">doctrine_title:              The Measurement Axioms
+doctrine_edition:            Baseline edition
+doctrine_version:            &quot;1.0.0&quot;
+doctrine_date:               2026-08-01
+specification:               Governance Verdict Validity v1.0
+
+claim_status:                SUPPORTED_NARRATIVE
+independent_reproducibility: NOT_MEASURED
+independent_review:          NOT_REQUESTED
+</code></pre>
+<blockquote>
+<p><strong>What this report is.</strong> A source reading, published so the reading can be
+checked. It is not an evidence bundle: no commit is pinned, no line ranges are
+given, no reproduction command is published, and no per-finding record is
+machine-readable. Under M1.1 the honest label for its reproducibility is
+<code>NOT_MEASURED</code> — not <code>PASS</code>, and not <code>FAIL</code>.</p>
+<p>The bundle would make these findings independently <em>reproducible</em>. A named
+independent review would still be required before the status could become
+<code>independently_assessed</code>. Neither exists yet.</p>
+</blockquote>
+<hr />
+<h2>Findings</h2>
+<p><strong>Eleven instances, in which a component or an assurance artefact represented a
+non-measurement as a positive or completed result</strong>, in two families.</p>
+<p><strong>Absence read as confirmation</strong> — five:</p>
+<ul>
+<li>A chain-integrity verifier returns <code>valid</code> for an empty chain. Three packages
+  carry passing tests that enshrine this; a fourth implementation does the same,
+  untested.</li>
+<li>The same verifier takes an optional signature-checker. Called without one — as
+  every caller in the published package does but one — <strong>a record whose signature
+  has been tampered with returns <code>valid</code></strong>. A passing test asserts this as
+  documented default behaviour.</li>
+<li>A declaration-coverage metric computed against a repository the process could not
+  read returns a fabricated constant: <code>1.0</code> when nothing was declared, <code>0.5</code>
+  otherwise. Neither was measured; the denominator was empty.</li>
+<li>A descriptor-verification step receives <code>None</code> — never measured — coerces it to
+  <code>False</code>, and records the disposition <code>admit</code> together with the reason
+  <strong>&ldquo;descriptor hash matches user-approved baseline&rdquo;</strong>. No baseline was compared.
+  That sentence is then hash-chained and signed into the evidence record.</li>
+<li>A commit gate whose telemetry file is missing does not fire at all, and its
+  silence is indistinguishable from approval.</li>
+</ul>
+<p><strong>Proxy read as the thing</strong> — six:</p>
+<ul>
+<li>A content digest is present, therefore the material is marked <strong>resolvable</strong> —
+  fetchable and checkable by a verifier. Our own specification names the exact
+  counter-case (&ldquo;the material is redacted but its <code>content_hash</code> is still
+  recorded&rdquo;) as one that must be marked unresolvable.</li>
+<li>A gate escalates to <em>attenuate</em> while attaching no attenuation parameters, and no
+  downstream consumer recognises the verdict. Structurally, not incidentally: the
+  parameters are populated only for a different verdict.</li>
+<li>A record carries a <code>signature</code> field whose algorithm reads <code>"unsigned"</code>.</li>
+<li>A pipeline stage named for auditing returns a status object and writes no record
+  — including on the exception path, where it still returns <code>ok</code>.</li>
+<li>Our own reference exporter violates <strong>four</strong> MUST requirements of the
+  specification we authored, on its default code path.</li>
+<li>A published compliance mapping rates one control <strong>Full</strong> on the strength of four
+  cited evidence artefacts. <strong>No commit in either of the two repositories that
+  could hold them has ever added a file matching any of the four</strong>, and the
+  mechanism claims were already false at the last commit before the date the
+  mapping states it was verified.</li>
+</ul>
+<p>The last is the doctrine in miniature, and it is why R1 exists:</p>
+<blockquote>
+<p><em>&ldquo;A verifier MUST NOT treat an entry with <code>resolvable: false</code> as verified
+evidence. This prevents an unverifiable pointer from being counted as proof.&rdquo;</em>
+— AIREP v0.1 §4</p>
+</blockquote>
+<p><strong>We wrote that rule, then broke it in prose, in a public document.</strong> Nobody
+resolved the pointers. The presence of an evidence block was read as the presence
+of evidence.</p>
+<h3>What the properties found</h3>
+<p>Applied as a dead-branch detector over the same execution graph, P1–P5 surface a
+further class of defect that no test suite was positioned to see:</p>
+<ul>
+<li>A safety component reads a key under a name <strong>no producer writes</strong>. Three
+  consumers read it; none writes it. The nearest producer sits twenty-two positions
+  later in the declared order, so a matching name would still be read before it was
+  written. <em>(P3, P2)</em></li>
+<li>A conflict score is computed and reaches no branch. <em>(P5)</em></li>
+<li>A second key has two readers and zero writers anywhere in the codebase. <em>(P3)</em></li>
+<li>A write-conflict detector reads a schema field present on zero entries and reports
+  &ldquo;no conflict&rdquo; for every pair, while the concurrency it guards is on by default.
+  <em>(P4)</em></li>
+</ul>
+<h3>Appendix — where each finding can be checked</h3>
+<p>Ten of the eleven sit in artefacts anyone can obtain. Versions verified
+1 August 2026.</p>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty chain returns <code>valid</code></td>
+<td><code>phionyx-mcp-server</code> <strong>0.2.0</strong> on PyPI — and two further packages carry the same behaviour</td>
+</tr>
+<tr>
+<td>Verifier-less call passes a tampered signature</td>
+<td><code>phionyx-mcp-server</code> 0.2.0, including its own test asserting it</td>
+</tr>
+<tr>
+<td><code>resolvable</code> derived from a digest</td>
+<td><code>phionyx-mcp-server</code> 0.2.0</td>
+</tr>
+<tr>
+<td><code>signature.alg == "unsigned"</code></td>
+<td><code>phionyx-mcp-server</code> 0.2.0</td>
+</tr>
+<tr>
+<td>Exporter violates four spec MUSTs</td>
+<td><code>phionyx-mcp-server</code> 0.2.0 against the published AIREP v0.1 specification</td>
+</tr>
+<tr>
+<td>Unmeasured descriptor admitted with a positive reason</td>
+<td><code>phionyx-mcp-server</code> 0.2.0</td>
+</tr>
+<tr>
+<td>Fabricated coverage constant</td>
+<td>development harness, in the public research mirror</td>
+</tr>
+<tr>
+<td>Commit gate silent without telemetry</td>
+<td>development harness, in the public research mirror</td>
+</tr>
+<tr>
+<td>Attenuation verdict with no parameters, ignored by consumers</td>
+<td>development harness, in the public research mirror</td>
+</tr>
+<tr>
+<td>Compliance mapping rating a control Full on citations that resolve to nothing</td>
+<td>public research mirror</td>
+</tr>
+</tbody>
+</table>
+<p><strong>One is not externally checkable.</strong> The audit-named stage that writes no record:
+the pipeline block is in <code>phionyx-core</code> <strong>0.9.0</strong>, but the wiring that makes it a
+no-op lives in a bridge layer that is not published. That finding rests on our
+authority and an external reader cannot confirm or refute it. It is marked rather
+than allowed to pass as verified.</p>
+<p><strong>What the bundle will add</strong>, and what its absence currently costs: commit pins, a
+source snapshot digest, file and line ranges per finding, the reproduction command
+for each, the static-analysis queries used, and one machine-readable record per
+finding carrying <code>expected: NOT_MEASURED</code> against <code>observed: PASS</code>. Until it
+exists, §VII is a reading, not a measurement, and it says so.</p>
+<hr />
+<h2>Addendum — the twelfth, and it is in the doctrine&rsquo;s own tooling</h2>
+<p>Found by external review on the day of writing, in the reference implementation
+published alongside the doctrine.</p>
+<p><strong>The first conformance probe for the Measurement Axioms returned a positive
+result when it had measured nothing.</strong> <code>ProbeReport.conformant</code> was a boolean
+computed over observations, and an unexercised case counted as conformant — so a
+run that exercised zero cases reported success while its own summary printed
+<code>NOTHING WAS EXERCISED</code>.</p>
+<p>That is M1.1 exactly, produced by the artefact written to detect it.</p>
+<p>Four more in the same two modules:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A target that raised was recorded as a pass</td>
+<td>a crash is not a conformance result</td>
+</tr>
+<tr>
+<td>The probe did not recognise its own companion type&rsquo;s <code>PASS</code></td>
+<td>the two reference modules did not understand each other</td>
+</tr>
+<tr>
+<td>A bare <code>False</code> was treated as conformant</td>
+<td>it may mean <code>FAIL</code>, which is a different claim; guessing is not permitted</td>
+</tr>
+<tr>
+<td><code>Verdict</code> was truthy, so <code>if measurement.verdict:</code> still collapsed</td>
+<td><code>Measurement.__bool__</code> raised; the enum did not. The type enforced half of what it claimed</td>
+</tr>
+</tbody>
+</table>
+<p>And one defect in the specification itself, which the probe made visible: <strong>MA-6.1
+as written condemned the correct behaviour.</strong> A component that answers
+<code>NOT_MEASURED</code> to every degenerate input is invariant over that class — and the
+requirement read invariance as proof of non-measurement. Selectivity needs a
+<em>control</em> input paired with the degenerate one; only the pair separates a
+component that refuses to guess from one that never looked.</p>
+<p><strong>All six are corrected</strong>, with a regression test for each, and the corrected
+probe now reports a <code>Verdict</code> rather than a boolean: zero coverage yields
+<code>NOT_MEASURED</code>, a crash yields <code>ERROR</code>, an uninterpretable return yields
+<code>INCONCLUSIVE</code>.</p>
+<p>Two things worth stating plainly. <strong>None of this was caught by us</strong> — it came from
+an independent reader of the same source, which is R2 with a date on it. And while
+fixing it, the newly added <code>Verdict.__bool__</code> guard raised on a line <em>inside the
+probe</em>, where the correction itself had been written as
+<code>x.value if x else "?"</code> — the guard catching its own author committing the
+collapse it forbids.</p>
+<hr />
+<h2>Remediation</h2>
+<p>Tracked in
+<strong>an internal remediation plan, which is not published</strong>.
+No finding in this report is closed. Each carries a <code>work_status</code> and a
+<code>verification_status</code>; none has <code>verification_status: pass</code>.</p>
+</main>
+
+<script>
+(function () {
+  // wrap tables so wide content scrolls inside itself, never the page
+  document.querySelectorAll('table').forEach(function (t) {
+    var w = document.createElement('div');
+    w.className = 'table-wrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
+})();
+</script>
+
+</body>
+</html>

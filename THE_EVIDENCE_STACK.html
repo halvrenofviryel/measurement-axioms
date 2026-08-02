@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Evidence Stack</title>
+<style>
+:root {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --rule: #e2ded7;
+  --accent: #8a3324; --code-bg: #f2efe9; --table-head: #f5f2ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16151a; --fg: #e6e3dd; --muted: #98948c; --rule: #302e34;
+    --accent: #e08a6e; --code-bg: #201f25; --table-head: #1e1d23;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16151a; --fg: #e6e3dd; --muted: #98948c; --rule: #302e34;
+  --accent: #e08a6e; --code-bg: #201f25; --table-head: #1e1d23;
+}
+:root[data-theme="light"] {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --rule: #e2ded7;
+  --accent: #8a3324; --code-bg: #f2efe9; --table-head: #f5f2ec;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 17px/1.68 Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
+  margin: 0; padding: 3.5rem 1.25rem 6rem;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 44rem; margin: 0 auto; }
+h1, h2, h3 {
+  font-family: "Helvetica Neue", Inter, system-ui, sans-serif;
+  line-height: 1.25; letter-spacing: -0.014em;
+}
+h1 { font-size: 2.3rem; margin: 0 0 .4rem; font-weight: 700; }
+h2 {
+  font-size: 1.42rem; margin: 3.4rem 0 1rem; font-weight: 650;
+  padding-top: 1.6rem; border-top: 1px solid var(--rule);
+}
+h3 { font-size: 1.12rem; margin: 2.2rem 0 .7rem; font-weight: 650; color: var(--muted); }
+h1 + h3 { margin-top: 0; font-size: 1.22rem; color: var(--fg); font-weight: 500; }
+p, li { overflow-wrap: break-word; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+strong { font-weight: 680; }
+blockquote {
+  margin: 1.5rem 0; padding: .2rem 0 .2rem 1.25rem;
+  border-left: 3px solid var(--accent); color: var(--fg);
+  font-size: 1.06em; font-style: italic;
+}
+blockquote p { margin: .45rem 0; }
+code {
+  background: var(--code-bg); padding: .12em .38em; border-radius: 3px;
+  font: .86em/1.5 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
+pre {
+  background: var(--code-bg); padding: .9rem 1rem; border-radius: 5px;
+  overflow-x: auto; margin: 1.4rem 0; line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: .84em; white-space: pre; }
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+table {
+  border-collapse: collapse; width: 100%; font-size: .93rem;
+  font-family: "Helvetica Neue", Inter, system-ui, sans-serif;
+}
+th, td { text-align: left; padding: .58rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { background: var(--table-head); font-weight: 650; }
+ul, ol { padding-left: 1.4rem; }
+li { margin: .42rem 0; }
+em { color: var(--fg); }
+@media (max-width: 34rem) {
+  body { padding: 2rem 1rem 4rem; font-size: 16px; }
+  h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>The Evidence Stack</h1>
+<h3>Rules, runtime, record — and why they are three things, not one</h3>
+<p><strong>Ali Toygar Abak</strong> · ORCID <a href="https://orcid.org/0009-0002-3718-4010">0009-0002-3718-4010</a>
+<strong>Phionyx</strong> · 1 August 2026</p>
+<blockquote>
+<p>Companion to <a href="./THE_MEASUREMENT_AXIOMS.md">The Measurement Axioms</a>. That document
+states the rules. This one says where they sit relative to everything else we
+have built, and what the arrangement means for AI governance.</p>
+</blockquote>
+<hr />
+<h2>I. The one distinction that organises everything</h2>
+<p>Two questions look alike and are not:</p>
+<blockquote>
+<p><strong>Was this record altered?</strong>
+<strong>Was the claim in this record measured?</strong></p>
+</blockquote>
+<p>The first is answered by a format: canonical serialisation, a content hash, a
+chain link, a signature. Anyone can check it offline, without access to the
+system that produced it.</p>
+<p>The second cannot be answered by a format at all. A record can be perfectly
+formed, correctly hashed, validly signed, properly chained — and assert something
+that never happened.</p>
+<p><strong>We have the case, and it is ours.</strong> In our own runtime, a descriptor
+verification step received <code>None</code> — never measured — coerced it to <code>False</code>, and
+wrote into the evidence chain:</p>
+<pre><code>disposition: admit
+reason:      &quot;descriptor hash matches user-approved baseline&quot;
+</code></pre>
+<p>No baseline was compared. The envelope carrying that sentence was schema-valid,
+hash-chained and signed. <strong>The format did its job flawlessly and preserved a
+falsehood.</strong></p>
+<p>That is not a defect in the format. It is the boundary of what a format can do,
+and it is why the rules are a separate artefact.</p>
+<hr />
+<h2>II. The stack</h2>
+<pre><code>              THE MEASUREMENT AXIOMS
+       when a governance verdict counts as a measurement
+                          │
+                          ▼
+                PHIONYX RUNTIME FAMILY
+         makes, constrains and evaluates decisions
+                          │
+       ┌──────────────────┼──────────────────┐
+       ▼                  ▼                  ▼
+  Phionyx Core    phionyx-pipeline-mcp   phionyx-mcp-server
+  46-block        inward: agent          outward: third-party
+  runtime engine  self-claim gate        tool boundary
+       └──────────────────┼──────────────────┘
+                          ▼
+                    PHIONYX RGE
+          Phionyx's producer and profile for AIREP
+                          │
+                          ▼
+                        AIREP
+       neutral, offline-checkable decision receipt
+                          │
+                          ▼
+                 external verifier
+</code></pre>
+<p>Four verbs:</p>
+<blockquote>
+<p><strong>The doctrine defines. Phionyx governs. The MCP gates challenge and observe.
+AIREP records.</strong></p>
+</blockquote>
+<hr />
+<h2>III. What each piece is, precisely</h2>
+<h3>The Measurement Axioms — a design discipline</h3>
+<p>Not a product, not a format, not a standard. A normative discipline stating when
+a governance verdict deserves to count as a measurement: non-execution must not
+collapse into success; a measured value must reach its intended consumer; an
+intervention claim requires material effect; a replay claim requires sufficient
+decision inputs. It enforces nothing. It states what an implementation must
+satisfy, and supplies the checks by which the question is decided.</p>
+<h3>Phionyx Core — a deterministic runtime around probabilistic generation</h3>
+<p>Published as <code>phionyx-core</code>. Its job is not to define an evidence format. Its job
+is to put a deterministic governance path between a model&rsquo;s output and an action:
+a canonical execution order, structured state, pre-response gates, a kill switch,
+a human-in-the-loop queue, and an audit trail.</p>
+<blockquote>
+<p><strong>Phionyx Core governs probabilistic output before it becomes action.</strong></p>
+</blockquote>
+<h3>The two MCP gates — different boundaries, different questions</h3>
+<p>These are frequently collapsed into &ldquo;the Phionyx pipeline&rdquo; and they should not
+be. They are separate packages governing separate boundaries, and one of them
+shares a word with something else entirely.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>phionyx-pipeline-mcp</code></th>
+<th><code>phionyx-mcp-server</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Faces</strong></td>
+<td>inward, at our own agent</td>
+<td>outward, at third-party tools</td>
+</tr>
+<tr>
+<td><strong>Question</strong></td>
+<td>does the agent&rsquo;s <em>&ldquo;I fixed / tested / changed it&rdquo;</em> match what the repository shows?</td>
+<td>what crossed the tool boundary, did its descriptor change, and is there a record?</td>
+</tr>
+<tr>
+<td><strong>Produces</strong></td>
+<td>a claim verdict and reviewer-runnable evidence</td>
+<td>hash-chained tool-call envelope records, with production signing under active alignment</td>
+</tr>
+</tbody>
+</table>
+<p><strong>A naming hazard worth stating once.</strong> &ldquo;The Phionyx pipeline&rdquo; is ambiguous
+between the <strong>46-block canonical runtime path inside Core</strong> and the package
+<strong><code>phionyx-pipeline-mcp</code></strong>, which is a narrow self-claim gate and not the engine.
+We use the full names.</p>
+<h3>RGE — the bridge, not a synonym</h3>
+<p>RGE is Phionyx&rsquo;s producer for AIREP and its profile of that format. It is not
+another name for AIREP, and AIREP is not Phionyx&rsquo;s format.</p>
+<blockquote>
+<p><strong>RGE is AIREP&rsquo;s first reference producer, currently being aligned against the
+specification</strong> — not a conformant one. Our own audit found the exporter
+violating four of AIREP&rsquo;s MUST requirements on its default path.</p>
+</blockquote>
+<h3>AIREP — a neutral protocol</h3>
+<p><code>ai-runtime-evidence-protocol</code>. One signed, hash-chained, canonical-JSON record
+per decision, checkable offline by someone with neither the runtime nor its
+source. Vendor- and model-independent by construction, and explicit that a valid
+record attests the path, not the truth of the output.</p>
+<hr />
+<h2>IV. Two directions the relationship does not run</h2>
+<p><strong>A valid record does not imply a valid measurement.</strong> The descriptor case in §I
+is exactly this: everything the format checks passed, and the claim was empty.</p>
+<p><strong>A valid measurement does not require this format.</strong> A runtime satisfying the
+Measurement Axioms may emit its evidence in any schema it likes. The axioms are
+not a marketing surface for AIREP, and adopting AIREP is not conformance to them.</p>
+<pre><code>Measurement Axioms conformant   ≠   AIREP conformant
+</code></pre>
+<p>A system wanting both needs both: <strong>semantic validity from the doctrine, record
+and interchange validity from the protocol.</strong></p>
+<hr />
+<h2>V. Where they touch, and how they should be joined</h2>
+<p><code>measurement_status</code> and AIREP&rsquo;s <code>directive.verb</code> are not the same field and must
+not be merged.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Values</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>directive.verb</code></td>
+<td><code>release</code> · <code>block</code> · <code>defer</code> · <code>redact</code> · <code>escalate_to_human</code> · <code>kill</code></td>
+<td>what was done</td>
+</tr>
+<tr>
+<td><code>measurement_status</code></td>
+<td><code>PASS</code> · <code>FAIL</code> · <code>NOT_MEASURED</code> · <code>INCONCLUSIVE</code> · <code>ERROR</code> · <code>NOT_APPLICABLE</code></td>
+<td>what the evaluation behind it establishes</td>
+</tr>
+</tbody>
+</table>
+<p>They are orthogonal, and both combinations below are recordable:</p>
+<pre><code class="language-yaml">directive: { verb: block }        # coherent: undecided, so fail safe
+measurement_status: INCONCLUSIVE
+
+directive: { verb: release }      # recordable, and not acceptable governance:
+measurement_status: NOT_MEASURED  # nothing was measured, yet action proceeded
+</code></pre>
+<p>The second is exactly what the doctrine forbids and what a format alone will
+happily preserve.</p>
+<p><strong>The join belongs in a profile, not in the core.</strong> AIREP reserves <code>profiles</code> for
+implementation- and domain-specific content, and this is what that reservation is
+for:</p>
+<pre><code class="language-yaml">profiles:
+  measurement_axioms:
+    measurement_status:   NOT_MEASURED
+    execution_status:     policy_unavailable
+    enforcement_status:   requested
+    evidence_status:      E0
+    required_consumer:    release_gate
+    consumer_acknowledged: false
+</code></pre>
+<p>This keeps AIREP&rsquo;s core neutral, lets any runtime carry the semantics without
+adopting Phionyx, and leaves a later core change to be argued on evidence of
+common need rather than asserted now.</p>
+<hr />
+<h2>VI. Two guarantees that share a word</h2>
+<p><strong>Replay</strong> means different things in the two layers, and the difference matters
+to anyone reading a conformance claim.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>What is re-derived</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIREP verification</td>
+<td>the record&rsquo;s canonical bytes, hash, signature and chain position</td>
+</tr>
+<tr>
+<td>Measurement Axioms <strong>E4</strong></td>
+<td>the measurement mapping, the verdict and the state transition</td>
+</tr>
+</tbody>
+</table>
+<p>A record can satisfy the first and not the second. Passing an AIREP verifier is
+not evidence-level E4.</p>
+<hr />
+<h2>VII. What this arrangement means for AI governance</h2>
+<p><strong>The field checks content. It rarely checks whether the check ran.</strong> Regulatory
+and standards instruments ask what an organisation decided, documented and
+disclosed. We have not found one that asks whether the deciding component
+performed an act whose outcome could have differed — the domain of that search is
+stated in the doctrine&rsquo;s <em>Related work</em>, and it is small.</p>
+<p>Three consequences follow from separating the layers.</p>
+<p><strong>A format is falsifiable from the record; a runtime is not.</strong> AIREP conformance
+can be checked by anyone holding the record. Measurement Axioms conformance
+cannot be established from a decision record alone: some requirements are
+black-box testable, and full assessment needs implementation access, execution
+evidence, or both. <strong>The asymmetry is the
+argument for independent assessment</strong>, and it is why our own audit is published
+as <code>SUPPORTED_NARRATIVE</code> with <code>independent_reproducibility: NOT_MEASURED</code> rather
+than as evidence.</p>
+<p><strong>Neither layer belongs to one vendor.</strong> We authored a format and a discipline,
+and separating them is the mechanism by which either can be adopted without the
+other — or without us. A rule and a record owned as one product is a lock-in
+surface wearing a governance jacket.</p>
+<p><strong>Authorship is not conformance.</strong> Our reference exporter violates four MUSTs of
+the specification we wrote. That is in the audit rather than in a backlog,
+because a project that cannot say this about itself has no standing to ask it of
+anyone else.</p>
+<hr />
+<h2>VIII. What we do not claim</h2>
+<p>Stated as prohibitions on our own copy, because each is a sentence we could
+plausibly have written.</p>
+<table>
+<thead>
+<tr>
+<th>Not this</th>
+<th>Because</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&ldquo;AIREP is the implementation of the Measurement Axioms&rdquo;</td>
+<td>AIREP is a record format. It enforces no ordering, selectivity, propagation or control-efficacy requirement.</td>
+</tr>
+<tr>
+<td>&ldquo;An AIREP-valid record proves the decision was correct&rdquo;</td>
+<td>The specification says a record attests the path, not the truth of the output.</td>
+</tr>
+<tr>
+<td>&ldquo;<code>phionyx-pipeline-mcp</code> is the 46-block pipeline&rdquo;</td>
+<td>One is a self-claim gate package; the other is Core&rsquo;s canonical runtime path.</td>
+</tr>
+<tr>
+<td>&ldquo;<code>phionyx-mcp-server</code> is Phionyx&rdquo;</td>
+<td>It is the outward-facing tool boundary in a family. Its own README states five of eight capabilities implemented and three explicit stubs.</td>
+</tr>
+<tr>
+<td>&ldquo;RGE is fully AIREP-conformant&rdquo;</td>
+<td>Our audit found four MUST violations on its default export path.</td>
+</tr>
+<tr>
+<td>&ldquo;Phionyx conforms to the Measurement Axioms&rdquo;</td>
+<td>Runtime enforcement is measured for 6 of 31 foundation items; third-party evaluation for 0.</td>
+</tr>
+<tr>
+<td>&ldquo;AIREP replay equals E4&rdquo;</td>
+<td>§VI.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The supportable statement, today:</strong></p>
+<blockquote>
+<p><strong>Phionyx is the doctrine&rsquo;s reference implementation project, under explicit
+self-audited alignment.</strong></p>
+</blockquote>
+<hr />
+<h2>IX. The short version</h2>
+<blockquote>
+<p>The Measurement Axioms define when an AI governance verdict deserves to count
+as a real measurement. Phionyx is the reference implementation project being aligned to apply
+that discipline across its runtime family — Core governs model output before it becomes action,
+<code>phionyx-pipeline-mcp</code> checks what an agent claims it changed, and
+<code>phionyx-mcp-server</code> records the third-party tool boundary. Their decisions can
+be emitted through RGE, the reference producer for AIREP. AIREP does not prove
+a decision was correct; it gives an outsider a neutral, checkable receipt of
+what was recorded.</p>
+</blockquote>
+<p>And the sentence the arrangement exists to make possible:</p>
+<blockquote>
+<p><strong>Phionyx does not own the evidence rule and the evidence format as one
+product. The doctrine defines the rule, Phionyx tests it in a runtime, and
+AIREP lets any runtime carry the resulting evidence beyond itself.</strong></p>
+</blockquote>
+</main>
+
+<script>
+(function () {
+  // wrap tables so wide content scrolls inside itself, never the page
+  document.querySelectorAll('table').forEach(function (t) {
+    var w = document.createElement('div');
+    w.className = 'table-wrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1664 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phionyx.ai/spec/measurement-axioms/v1.0/verdict-outcome.schema.json",
+  "title": "Governance Decision Record — Measurement Axioms v1.0",
+  "description": "One governance decision, recorded with its dimensions kept separate. Normative text: MEASUREMENT_AXIOMS_SPECIFICATION.md. The schema enforces what a schema can; the conformance checks in Section 9 of that document cover what it cannot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec_version",
+    "subject",
+    "measurement_status",
+    "decision_outcome",
+    "evidence_status"
+  ],
+  "properties": {
+    "spec_version": {
+      "const": "1.0",
+      "description": "The version of the Measurement Axioms specification this record conforms to."
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component",
+        "profile",
+        "timestamp_utc"
+      ],
+      "properties": {
+        "component": {
+          "type": "string",
+          "description": "Identifier of the governance component that produced this record.",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "producer": {
+          "type": "string",
+          "description": "Software that produced the record, with version.",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "profile": {
+          "type": "string",
+          "description": "MA-4.10 — the deployment profile in force. A profile may raise strictness and add dimensions; it may not remove mandatory ones.",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "decision_index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Per-chain decision index, starting at 0."
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "timestamp_utc": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+          "minLength": 1
+        }
+      }
+    },
+    "measurement_status": {
+      "description": "MA-3.1 — the status of the ACT OF CHECKING. NOT_MEASURED means the check did not run or could not reach its object. INCONCLUSIVE means it ran and did not decide. These are not interchangeable.",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_MEASURED",
+        "INCONCLUSIVE",
+        "ERROR",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "decision_outcome": {
+      "description": "MA-4.1/MA-4.2 — what was decided. Independent of measurement_status: an action does not itself produce PASS; its evaluation does.",
+      "enum": [
+        "allow",
+        "block",
+        "attenuate",
+        "escalate",
+        "abstain"
+      ]
+    },
+    "execution_status": {
+      "description": "What happened when the decision was carried out.",
+      "enum": [
+        "completed",
+        "timeout",
+        "tool_unavailable",
+        "policy_unavailable",
+        "failed"
+      ]
+    },
+    "operating_mode": {
+      "description": "MA-4.4 — degraded operation is a mode, not an execution status, and never a passing measurement.",
+      "enum": [
+        "normal",
+        "degraded"
+      ],
+      "default": "normal"
+    },
+    "authority": {
+      "description": "Who the decision is attributable to.",
+      "enum": [
+        "autonomous",
+        "human_confirmed",
+        "human_overridden"
+      ]
+    },
+    "observation": {
+      "description": "MA-4.5 — when the event became observable. A failure detected only after execution is not the same event as one recorded at decision time.",
+      "enum": [
+        "recorded",
+        "detected_after_execution",
+        "previously_silent_failure"
+      ]
+    },
+    "enforcement_status": {
+      "description": "MA-7.3 — a verdict whose enforcement was requested but not acknowledged MUST NOT be reported as applied.",
+      "enum": [
+        "not_required",
+        "not_performable",
+        "requested",
+        "acknowledged",
+        "applied",
+        "failed"
+      ]
+    },
+    "evidence_status": {
+      "description": "MA-5.2 — a record states its evidence status; this field is required, so \"signed\" or \"tamper-evident\" without a level cannot be recorded here. MA-5.1: cumulative — E4 asserts E0 through E3 as well. MA-5.3: E1 may not be claimed where the integrity mechanism is recomputable by a party able to alter the record.",
+      "enum": [
+        "E0",
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ]
+    },
+    "scope_decision": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "description": "MA-3.3 — REQUIRED when measurement_status is NOT_APPLICABLE. A free string cannot be resolved, so it cannot establish that the exclusion was documented.",
+      "required": [
+        "ref",
+        "resolvable"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "resolvable": {
+          "type": "boolean"
+        },
+        "evaluated_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "content_hash": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "default": null
+    },
+    "measured": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "MA-3.9 — derived values. A value here asserts that it was computed from a non-empty input. Where a denominator, baseline or comparand was empty, the value MUST be omitted or null and measurement_status MUST be NOT_MEASURED.",
+      "properties": {
+        "inputs_present": {
+          "type": "boolean",
+          "description": "MA-3.8 — whether the required input was obtainable and readable for measurement. `false` covers both an input that was not there and one that was there and could not be read: the distinction is carried by non_measurement_cause, and this field answers only whether a measurement could be taken from it. Omitted where nobody established either way — an unknown recorded as a known negative is itself an unmeasured claim."
+        },
+        "items_checked": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many items the check actually examined. Zero with PASS is a conformance failure."
+        },
+        "objects_examined": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "What was examined, where a count is not the natural unit.",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "MA-3.10 — MUST NOT assert an operation that did not occur. Where measurement_status is NOT_MEASURED, this states what was not measured.",
+      "default": null,
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "evidence": {
+      "type": "array",
+      "description": "MA-9.1 — typed pointers. A citation that does not resolve is not evidence.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref",
+          "resolvable"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "content_hash": {
+            "$ref": "#/$defs/digest"
+          },
+          "resolvable": {
+            "type": "boolean",
+            "description": "True only where a verifier can fetch the referenced material and check it. The presence of a content_hash does not make a pointer resolvable."
+          },
+          "evaluated_version": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "MA-9.1 — the version the citation was evaluated against.",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "MA-8.1/MA-8.2 — the inputs required to re-derive the verdict. Keyed on the decision, never on wall-clock time; a time value that affected the decision belongs here as an input.",
+      "properties": {
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "state_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "stochastic_draw": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Recorded so that probabilistic generation can carry deterministic governance replay.",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "recorded_time_value": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "Present only where time was an input to the decision.",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "interpretation_revisions": {
+      "type": "array",
+      "description": "MA-8.4 — append-only. The recorded payload is never modified; a revised reading is added alongside it.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revised_at",
+          "revised_by",
+          "note"
+        ],
+        "properties": {
+          "revised_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+            "minLength": 1
+          },
+          "revised_by": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The single reserved extension point. Implementation-, vendor- or domain-specific content belongs here and nowhere else."
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "MA-5.3/MA-5.4 — the basis for an evidence_status of E1 or above. Without it the level is a self-declared label. The base object requires only what E1 needs; the conditional rules add the signature basis at E2 and the identity basis at E3, so a hash-chained record is not forced to invent a signature.",
+      "required": [
+        "mechanism",
+        "algorithm",
+        "digest"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "key_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "signed_at": {
+          "type": "string",
+          "format": "date-time",
+          "minLength": 1,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+        },
+        "signed_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "description": "MA-5.4 — which fields the signature covers. A signature over an unstated subset attests an unstated thing.",
+          "uniqueItems": true
+        },
+        "identity_binding_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "trust_anchor_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "revocation_status_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "mechanism": {
+          "type": "string",
+          "enum": [
+            "hash",
+            "hash_chain",
+            "signature",
+            "signature_chain",
+            "external_timestamp",
+            "witnessed_ledger"
+          ],
+          "description": "MA-5.3 — the primary construction that makes alteration detectable. E2 and above may additionally carry a signature without the primary construction itself being named `signature`: a hash-chained record whose entries are separately signed has `mechanism: hash_chain` and a signature basis. The field names the integrity layer; the signature fields name the attribution layer."
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "verification_key_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Where the verifying key may be obtained.",
+          "pattern": "\\S"
+        },
+        "timestamp_token_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MA-5.6 — the timestamp token itself.",
+          "pattern": "\\S"
+        },
+        "timestamp_authority_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MA-5.6 — who issued it.",
+          "pattern": "\\S"
+        },
+        "ledger_receipt_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MA-5.6 — the receipt for the witnessed entry.",
+          "pattern": "\\S"
+        },
+        "ledger_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MA-5.6 — which ledger witnessed it.",
+          "pattern": "\\S"
+        },
+        "previous_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "chain_context_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MA-5.6 — where the chain this entry belongs to may be read.",
+          "pattern": "\\S"
+        },
+        "chain_position": {
+          "type": "string",
+          "enum": [
+            "genesis",
+            "linked"
+          ],
+          "description": "MA-5.6 — `genesis` is the documented exception to carrying a preceding link: the first entry has none. Any other entry is `linked` and carries previous_digest."
+        }
+      }
+    },
+    "intervention": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "MA-7.4 — an intervention claim carries what it takes to perform and to check the intervention.",
+      "required": [
+        "type",
+        "intended_consumer"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "block",
+            "attenuate",
+            "redact",
+            "rate_limit",
+            "escalate",
+            "defer"
+          ]
+        },
+        "parameters": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "MA-7.4 — what the consumer needs in order to perform the directive. An empty object names no performable act, so the directive is advisory however it is labelled."
+        },
+        "intended_consumer": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "acknowledged_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "material_effect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref",
+            "resolvable"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "resolvable": {
+              "type": "boolean"
+            },
+            "evaluated_version": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "content_hash": {
+              "$ref": "#/$defs/digest"
+            }
+          },
+          "description": "MA-7.6 — the observed change in output, action, state transition, authority or control flow. Typed like scope_decision and the evidence entries, for the same reason: a bare string cannot be resolved by a reader, and a null one asserted the effect while evidencing none of it."
+        }
+      }
+    },
+    "non_measurement_cause": {
+      "type": "string",
+      "enum": [
+        "not_executed",
+        "suppressed_by_tier",
+        "input_absent",
+        "input_unreadable",
+        "object_unreachable",
+        "unknown"
+      ],
+      "description": "MA-3.11 — why no measurement was taken, from a closed vocabulary. Distinguishing 'the check did not run' from 'the object could not be reached' is the distinction MA-3.1 turns on, and free text does not survive aggregation. Core semantics of this specification, so a top-level field rather than a profile extension."
+    },
+    "advisory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "intended_consumer",
+        "not_performable_because"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "block",
+            "attenuate",
+            "redact",
+            "rate_limit",
+            "escalate",
+            "defer"
+          ],
+          "description": "MA-7.7 — the mechanism the producer would have applied. The same vocabulary and the same outcome compatibility as intervention.type: an advisory recommending a mechanism the decision did not call for describes two different things, which is the reading MA-7.7 exists to prevent."
+        },
+        "intended_consumer": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "not_performable_because": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "What the directive lacks. MA-7.4 makes an unperformable directive advisory; this states which part is missing so a reader is not left to infer it."
+        }
+      },
+      "description": "MA-7.9 — a recommendation the producer could not turn into a performable directive. Recorded here rather than as an intervention, because MA-7.1 forbids representing an advisory control as an intervention."
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "MA-3.3 — NOT_APPLICABLE requires a resolvable scope decision. A pointer the producer could not resolve leaves the exclusion unestablished; the honest status is NOT_MEASURED.",
+      "if": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_APPLICABLE"
+          }
+        },
+        "required": [
+          "measurement_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "scope_decision"
+        ],
+        "properties": {
+          "scope_decision": {
+            "type": "object",
+            "required": [
+              "ref",
+              "resolvable"
+            ],
+            "properties": {
+              "resolvable": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-4.3 — an unmeasured governance decision may not be allowed.",
+      "if": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_MEASURED"
+          }
+        },
+        "required": [
+          "measurement_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_outcome": {
+            "enum": [
+              "block",
+              "escalate",
+              "abstain"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.9/MA-6.1 — PASS over zero examined objects is a vacuous pass.",
+      "if": {
+        "properties": {
+          "measurement_status": {
+            "const": "PASS"
+          },
+          "measured": {
+            "type": "object",
+            "properties": {
+              "items_checked": {
+                "const": 0
+              }
+            },
+            "required": [
+              "items_checked"
+            ]
+          }
+        },
+        "required": [
+          "measurement_status",
+          "measured"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "$comment": "MA-4.4 — degraded operation is never recorded as passing.",
+      "if": {
+        "properties": {
+          "operating_mode": {
+            "const": "degraded"
+          }
+        },
+        "required": [
+          "operating_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "measurement_status": {
+            "not": {
+              "const": "PASS"
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.3 — enforcement applies to a decision that required it. It is NOT coupled to measurement_status: NOT_MEASURED + block + applied is a legitimate fail-safe record. The intervening set must match MA-7.7's table exactly; an earlier version of this rule omitted `abstain` and so rejected the abstain/defer pair the specification permits.",
+      "if": {
+        "properties": {
+          "enforcement_status": {
+            "const": "applied"
+          }
+        },
+        "required": [
+          "enforcement_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_outcome": {
+            "enum": [
+              "block",
+              "attenuate",
+              "escalate",
+              "abstain"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.3 — E1 and above require an integrity basis. E1 asserts the record has not been altered undetectably; a label alone asserts it of itself. Whether the mechanism is sound (key custody, MA-5.3) is not schema-decidable — this only stops the empty claim.",
+      "if": {
+        "properties": {
+          "evidence_status": {
+            "enum": [
+              "E1",
+              "E2",
+              "E3",
+              "E4"
+            ]
+          }
+        },
+        "required": [
+          "evidence_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "integrity"
+        ],
+        "properties": {
+          "integrity": {
+            "required": [
+              "mechanism",
+              "algorithm",
+              "digest"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.4 — E2 and above name the key that signed the record and the fields it covers.",
+      "if": {
+        "properties": {
+          "evidence_status": {
+            "enum": [
+              "E2",
+              "E3",
+              "E4"
+            ]
+          }
+        },
+        "required": [
+          "evidence_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "required": [
+              "mechanism",
+              "algorithm",
+              "digest",
+              "signature",
+              "key_id",
+              "signed_at",
+              "signed_fields"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.4 — E3 binds that key to an identity under a trust anchor, with revocation status. Present-but-null satisfies neither: the fields must carry values, or E3 is a self-declared label.",
+      "if": {
+        "properties": {
+          "evidence_status": {
+            "enum": [
+              "E3",
+              "E4"
+            ]
+          }
+        },
+        "required": [
+          "evidence_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "required": [
+              "mechanism",
+              "algorithm",
+              "digest",
+              "signature",
+              "key_id",
+              "signed_at",
+              "signed_fields",
+              "identity_binding_ref",
+              "trust_anchor_ref",
+              "revocation_status_ref"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.1/MA-8.1 — E4 asserts the verdict can be re-derived, so the record carries what it takes to re-derive it.",
+      "if": {
+        "properties": {
+          "evidence_status": {
+            "const": "E4"
+          }
+        },
+        "required": [
+          "evidence_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "replay"
+        ],
+        "properties": {
+          "replay": {
+            "required": [
+              "policy_version",
+              "state_ref"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.11 — NOT_MEASURED names why. Without a cause the record cannot distinguish a check that did not run from an object that could not be reached, which is the distinction MA-3.1 turns on.",
+      "if": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_MEASURED"
+          }
+        },
+        "required": [
+          "measurement_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "non_measurement_cause"
+        ]
+      }
+    },
+    {
+      "$comment": "MA-7.6 (with MA-7.2) — an applied intervention names what changed, with a reference that resolved. `applied` without one asserts the material effect MA-7.2 requires and evidences none of it.",
+      "if": {
+        "properties": {
+          "enforcement_status": {
+            "const": "applied"
+          },
+          "decision_outcome": {
+            "enum": [
+              "block",
+              "attenuate",
+              "escalate",
+              "abstain"
+            ]
+          }
+        },
+        "required": [
+          "enforcement_status",
+          "decision_outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "intervention"
+        ],
+        "properties": {
+          "intervention": {
+            "required": [
+              "type",
+              "intended_consumer",
+              "material_effect"
+            ],
+            "properties": {
+              "material_effect": {
+                "properties": {
+                  "resolvable": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.4 — a parameterised directive carries its parameters, and a parameter object with nothing in it is not parameters. `defer` is parameterised for the same reason as the rest: deferred until when, or pending what, is the part that makes it performable.",
+      "if": {
+        "properties": {
+          "intervention": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "attenuate",
+                  "redact",
+                  "rate_limit",
+                  "defer"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        },
+        "required": [
+          "intervention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention": {
+            "required": [
+              "parameters"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.11 — a non_measurement_cause states why no measurement was taken, so it belongs only to a record that took none. On any other status it says both that a measurement happened and why none did.",
+      "if": {
+        "required": [
+          "non_measurement_cause"
+        ]
+      },
+      "then": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_MEASURED"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — `block` names the class of effect; intervention.type names the mechanism performing it. Permitted: block.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "block"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "intervention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "block"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — `attenuate` names the class of effect; intervention.type names the mechanism performing it. Permitted: attenuate, redact, rate_limit.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "attenuate"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "intervention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "attenuate",
+                  "redact",
+                  "rate_limit"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — `escalate` names the class of effect; intervention.type names the mechanism performing it. Permitted: escalate, defer.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "escalate"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "intervention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "escalate",
+                  "defer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — `abstain` names the class of effect; intervention.type names the mechanism performing it. Permitted: defer.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "abstain"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "intervention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "defer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — `allow` decided against intervening, so it carries no intervention record. One here would name an effect the decision did not call for.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "allow"
+          }
+        },
+        "required": [
+          "decision_outcome"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "intervention"
+          ]
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.3 — a scope_decision says why an object was not assessed, so it belongs only to NOT_APPLICABLE. Elsewhere it states both that the object was assessed and that it was out of scope.",
+      "if": {
+        "required": [
+          "scope_decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.3 — an out-of-scope object was not examined, so there is no count of examined items and no input state to report.",
+      "if": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_APPLICABLE"
+          }
+        },
+        "required": [
+          "measurement_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "measured": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "items_checked"
+                  ]
+                },
+                {
+                  "required": [
+                    "inputs_present"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.6 — a record naming external_timestamp as its integrity construction carries that construction's artefact. Naming a mechanism and omitting what makes it one is the same empty claim as an evidence level with no basis at all.",
+      "if": {
+        "properties": {
+          "integrity": {
+            "properties": {
+              "mechanism": {
+                "enum": [
+                  "external_timestamp"
+                ]
+              }
+            },
+            "required": [
+              "mechanism"
+            ]
+          }
+        },
+        "required": [
+          "integrity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "required": [
+              "timestamp_token_ref",
+              "timestamp_authority_ref"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.6 — a record naming witnessed_ledger as its integrity construction carries that construction's artefact. Naming a mechanism and omitting what makes it one is the same empty claim as an evidence level with no basis at all.",
+      "if": {
+        "properties": {
+          "integrity": {
+            "properties": {
+              "mechanism": {
+                "enum": [
+                  "witnessed_ledger"
+                ]
+              }
+            },
+            "required": [
+              "mechanism"
+            ]
+          }
+        },
+        "required": [
+          "integrity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "required": [
+              "ledger_receipt_ref",
+              "ledger_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.6 — a signature construction carries the signature, the key that made it and the fields it covers. Without the field list the signature attests an unstated subset of the record.",
+      "if": {
+        "properties": {
+          "integrity": {
+            "properties": {
+              "mechanism": {
+                "enum": [
+                  "signature",
+                  "signature_chain"
+                ]
+              }
+            },
+            "required": [
+              "mechanism"
+            ]
+          }
+        },
+        "required": [
+          "integrity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "required": [
+              "signature",
+              "key_id",
+              "signed_fields"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.8 — an intervening outcome records exactly one of an intervention (a performable directive) or an advisory (one that is not). Requiring an intervention outright, as an earlier version did, left MA-7.4's advisory classification with no record shape it could be true in — and so contradicted TV-8.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "enum": [
+              "block",
+              "attenuate",
+              "escalate",
+              "abstain"
+            ]
+          }
+        },
+        "required": [
+          "decision_outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "enforcement_status"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "intervention"
+            ],
+            "properties": {
+              "enforcement_status": {
+                "enum": [
+                  "requested",
+                  "acknowledged",
+                  "applied",
+                  "failed"
+                ]
+              }
+            }
+          },
+          {
+            "required": [
+              "advisory"
+            ],
+            "properties": {
+              "enforcement_status": {
+                "const": "not_performable"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "$comment": "MA-7.9 — `not_performable` is its own state. Collapsing it into `failed` would claim an attempt, and into `not_required` would claim the decision did not call for the effect. Both are measurements nobody took.",
+      "if": {
+        "properties": {
+          "enforcement_status": {
+            "const": "not_performable"
+          }
+        },
+        "required": [
+          "enforcement_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "advisory"
+        ],
+        "not": {
+          "required": [
+            "intervention"
+          ]
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.1 — an advisory control is not an intervention, so the two never appear together and an advisory never carries a live enforcement state.",
+      "if": {
+        "required": [
+          "advisory"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "intervention"
+          ]
+        },
+        "properties": {
+          "enforcement_status": {
+            "const": "not_performable"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.8 — `allow` declined to intervene, so it carries neither an intervention nor an advisory, and the only status it can hold is the one that says enforcement was not required.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "allow"
+          }
+        },
+        "required": [
+          "decision_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "enforcement_status": {
+            "const": "not_required"
+          }
+        },
+        "allOf": [
+          {
+            "not": {
+              "required": [
+                "intervention"
+              ]
+            }
+          },
+          {
+            "not": {
+              "required": [
+                "advisory"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "$comment": "MA-5.6 — where the mechanism is the hash itself, the algorithm named and the digest's own prefix are the same claim and must agree. Under a signature mechanism they differ legitimately: the digest names the hash, `algorithm` names the signature scheme.",
+      "if": {
+        "properties": {
+          "integrity": {
+            "properties": {
+              "mechanism": {
+                "enum": [
+                  "hash",
+                  "hash_chain"
+                ]
+              }
+            },
+            "required": [
+              "mechanism"
+            ]
+          }
+        },
+        "required": [
+          "integrity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "anyOf": [
+              {
+                "properties": {
+                  "algorithm": {
+                    "const": "sha256"
+                  },
+                  "digest": {
+                    "pattern": "^sha256:"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "algorithm": {
+                    "const": "sha384"
+                  },
+                  "digest": {
+                    "pattern": "^sha384:"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "algorithm": {
+                    "const": "sha512"
+                  },
+                  "digest": {
+                    "pattern": "^sha512:"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "algorithm": {
+                    "const": "blake2b"
+                  },
+                  "digest": {
+                    "pattern": "^blake2b:"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "algorithm": {
+                    "const": "blake3"
+                  },
+                  "digest": {
+                    "pattern": "^blake3:"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — an advisory recommends a mechanism, and the same compatibility holds for a recommendation as for a performed directive. Permitted under `block`: block.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "block"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "advisory"
+        ]
+      },
+      "then": {
+        "properties": {
+          "advisory": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "block"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — an advisory recommends a mechanism, and the same compatibility holds for a recommendation as for a performed directive. Permitted under `attenuate`: attenuate, redact, rate_limit.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "attenuate"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "advisory"
+        ]
+      },
+      "then": {
+        "properties": {
+          "advisory": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "attenuate",
+                  "redact",
+                  "rate_limit"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — an advisory recommends a mechanism, and the same compatibility holds for a recommendation as for a performed directive. Permitted under `escalate`: escalate, defer.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "escalate"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "advisory"
+        ]
+      },
+      "then": {
+        "properties": {
+          "advisory": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "escalate",
+                  "defer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-7.7 — an advisory recommends a mechanism, and the same compatibility holds for a recommendation as for a performed directive. Permitted under `abstain`: defer.",
+      "if": {
+        "properties": {
+          "decision_outcome": {
+            "const": "abstain"
+          }
+        },
+        "required": [
+          "decision_outcome",
+          "advisory"
+        ]
+      },
+      "then": {
+        "properties": {
+          "advisory": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "defer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-5.6 — a chain entry carries its link to the preceding entry, or it is the genesis entry and declares itself so. The two are mutually exclusive: a record carrying both says at once that nothing precedes it and what precedes it.",
+      "if": {
+        "properties": {
+          "integrity": {
+            "properties": {
+              "mechanism": {
+                "enum": [
+                  "signature_chain",
+                  "hash_chain"
+                ]
+              }
+            },
+            "required": [
+              "mechanism"
+            ]
+          }
+        },
+        "required": [
+          "integrity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity": {
+            "oneOf": [
+              {
+                "required": [
+                  "previous_digest"
+                ],
+                "not": {
+                  "properties": {
+                    "chain_position": {
+                      "const": "genesis"
+                    }
+                  },
+                  "required": [
+                    "chain_position"
+                  ]
+                }
+              },
+              {
+                "required": [
+                  "chain_position",
+                  "chain_context_ref"
+                ],
+                "properties": {
+                  "chain_position": {
+                    "const": "genesis"
+                  }
+                },
+                "not": {
+                  "required": [
+                    "previous_digest"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.8 — a cause of input_absent or input_unreadable says the required input could not be obtained for measurement. A record carrying inputs_present: true alongside it states both that it could and that it could not.",
+      "if": {
+        "properties": {
+          "non_measurement_cause": {
+            "enum": [
+              "input_absent",
+              "input_unreadable"
+            ]
+          }
+        },
+        "required": [
+          "non_measurement_cause"
+        ]
+      },
+      "then": {
+        "properties": {
+          "measured": {
+            "properties": {
+              "inputs_present": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "MA-3.8 — an absent or unreadable required input yields NOT_MEASURED. The earlier rule forbade only PASS, so FAIL, INCONCLUSIVE and ERROR could each report a result reached from an input the record says could not be obtained.",
+      "if": {
+        "properties": {
+          "measured": {
+            "type": "object",
+            "properties": {
+              "inputs_present": {
+                "const": false
+              }
+            },
+            "required": [
+              "inputs_present"
+            ]
+          }
+        },
+        "required": [
+          "measured"
+        ]
+      },
+      "then": {
+        "properties": {
+          "measurement_status": {
+            "const": "NOT_MEASURED"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        {
+          "pattern": "^sha384:[0-9a-f]{96}$"
+        },
+        {
+          "pattern": "^sha512:[0-9a-f]{128}$"
+        },
+        {
+          "pattern": "^blake2b:[0-9a-f]{128}$"
+        },
+        {
+          "pattern": "^blake3:[0-9a-f]{64}$"
+        }
+      ],
+      "description": "An algorithm-prefixed lowercase hex digest whose length matches the algorithm named. A single length range across algorithms accepts sha256 at 128 characters and sha512 at 64 — values no implementation produces, which a reader cannot recompute.",
+      "minLength": 1
+    }
+  }
+}

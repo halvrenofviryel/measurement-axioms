@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Measurement Axioms</title>
+<style>
+:root {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --rule: #e2ded7;
+  --accent: #8a3324; --code-bg: #f2efe9; --table-head: #f5f2ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16151a; --fg: #e6e3dd; --muted: #98948c; --rule: #302e34;
+    --accent: #e08a6e; --code-bg: #201f25; --table-head: #1e1d23;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16151a; --fg: #e6e3dd; --muted: #98948c; --rule: #302e34;
+  --accent: #e08a6e; --code-bg: #201f25; --table-head: #1e1d23;
+}
+:root[data-theme="light"] {
+  --bg: #fbfaf8; --fg: #1c1b19; --muted: #6b6862; --rule: #e2ded7;
+  --accent: #8a3324; --code-bg: #f2efe9; --table-head: #f5f2ec;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 17px/1.68 Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
+  margin: 0; padding: 3.5rem 1.25rem 6rem;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 44rem; margin: 0 auto; }
+h1, h2, h3 {
+  font-family: "Helvetica Neue", Inter, system-ui, sans-serif;
+  line-height: 1.25; letter-spacing: -0.014em;
+}
+h1 { font-size: 2.3rem; margin: 0 0 .4rem; font-weight: 700; }
+h2 {
+  font-size: 1.42rem; margin: 3.4rem 0 1rem; font-weight: 650;
+  padding-top: 1.6rem; border-top: 1px solid var(--rule);
+}
+h3 { font-size: 1.12rem; margin: 2.2rem 0 .7rem; font-weight: 650; color: var(--muted); }
+h1 + h3 { margin-top: 0; font-size: 1.22rem; color: var(--fg); font-weight: 500; }
+p, li { overflow-wrap: break-word; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+strong { font-weight: 680; }
+blockquote {
+  margin: 1.5rem 0; padding: .2rem 0 .2rem 1.25rem;
+  border-left: 3px solid var(--accent); color: var(--fg);
+  font-size: 1.06em; font-style: italic;
+}
+blockquote p { margin: .45rem 0; }
+code {
+  background: var(--code-bg); padding: .12em .38em; border-radius: 3px;
+  font: .86em/1.5 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
+pre {
+  background: var(--code-bg); padding: .9rem 1rem; border-radius: 5px;
+  overflow-x: auto; margin: 1.4rem 0; line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: .84em; white-space: pre; }
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+table {
+  border-collapse: collapse; width: 100%; font-size: .93rem;
+  font-family: "Helvetica Neue", Inter, system-ui, sans-serif;
+}
+th, td { text-align: left; padding: .58rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { background: var(--table-head); font-weight: 650; }
+ul, ol { padding-left: 1.4rem; }
+li { margin: .42rem 0; }
+em { color: var(--fg); }
+@media (max-width: 34rem) {
+  body { padding: 2rem 1rem 4rem; font-size: 16px; }
+  h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>The Measurement Axioms</h1>
+<h3>A doctrine for AI systems that must produce evidence, not assurances</h3>
+<p><strong>Ali Toygar Abak</strong> · ORCID <a href="https://orcid.org/0009-0002-3718-4010">0009-0002-3718-4010</a>
+<strong>Phionyx</strong> · 1 August 2026 · Baseline edition</p>
+<hr />
+<h2>I. The position</h2>
+<p>AI governance today is overwhelmingly <strong>content evaluation</strong>: is this output
+harmful, false, biased, misaligned? That work is necessary and this document does
+not compete with it.</p>
+<p>It sits on top of an unexamined assumption. Every content evaluation produces a
+<strong>verdict</strong>, and the verdict is treated as a fact about the output. It is not. It
+is a <em>measurement</em> — an act performed by a component that may or may not have
+executed, may or may not have had anything to look at, and may or may not be able
+to demonstrate afterwards which of those was the case.</p>
+<blockquote>
+<p><strong>The question this doctrine exists to make askable:
+when your evaluator returned <code>safe</code>, did it look at anything — and can you prove
+it?</strong></p>
+</blockquote>
+<p>An organisation can hold a complete set of policies, a mature risk register, a
+model card for every deployment, and a governance layer that returns <code>pass</code> on
+every turn <em>without ever having measured anything</em>.</p>
+<p><strong>Bounded claim.</strong> Within the frameworks and literature we have actually read —
+listed in <em>Related work</em>, chiefly NIST AI RMF 1.0&rsquo;s MEASURE function and the
+runtime-verification, vacuity-detection, fail-safe-default and attestation
+literature — we found requirements to <em>document</em> what cannot be measured and to
+assess control effectiveness, <strong>but no rule prohibiting a governance component
+from emitting <code>PASS</code> or <code>VALID</code> when the claimed measurement did not execute.</strong>
+We have not reviewed the ISO/IEC 42001 family, IEEE 7009&rsquo;s normative text, the
+EU AI Act&rsquo;s harmonised standards, or the 2026 OWASP agentic guidance. Under
+<strong>Boundary 4</strong> this is a statement about our search, not about the field, and it
+is offered to be falsified.</p>
+<p>This document states the axioms under which a governance runtime produces evidence
+rather than assurance, the properties that distinguish the two, and the checks by
+which the distinction is decided.</p>
+<p><strong>It is a design discipline, not an ethics framework.</strong> Its claims are engineering
+claims and are meant to be falsified.</p>
+<hr />
+<h2>II. The seven axioms</h2>
+<h3>M1 — Output is measurement, not truth</h3>
+<blockquote>
+<p>No measurement → no trust → no state update.</p>
+</blockquote>
+<p>A model&rsquo;s output is a sensor reading. So is an agent&rsquo;s report that it acted. So —
+and this is where the axiom does work that is not being done elsewhere — <strong>is a
+governance gate&rsquo;s own verdict</strong>. A verifier that checked nothing and returned
+<code>valid</code> is a sensor with its wire cut, reporting zero and being believed.</p>
+<p>Three levels of judgement, and they are not interchangeable:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Level</th>
+<th>The object judged</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L1</strong></td>
+<td>Model output</td>
+<td>one generation</td>
+</tr>
+<tr>
+<td><strong>L2</strong></td>
+<td>Agent action</td>
+<td>a decision with effects</td>
+</tr>
+<tr>
+<td><strong>L3</strong></td>
+<td>Governance verdict</td>
+<td>a claim <em>about</em> L1 or L2</td>
+</tr>
+</tbody>
+</table>
+<p>Most safety work operates at L1, increasingly at L2. <strong>L3 is where a governance
+system either earns its name or does not</strong>, and it is the level this doctrine is
+about.</p>
+<h4>M1.1 — Absence and proxy are both non-measurements</h4>
+<p>M1 states the consequence of <em>no measurement</em> and never defines what counts as
+one. Two families slip through.</p>
+<p><strong>Absence read as confirmation.</strong> A verifier with nothing to check returns the
+passing value. An empty set verifies vacuously. A missing baseline reports no
+change. An unreadable input yields a fabricated denominator. A monitor whose
+telemetry is absent does not fire, and its silence is indistinguishable from
+approval.</p>
+<p><strong>Proxy read as the thing.</strong> A content digest is present, so the material is
+marked fetchable. A verdict label is emitted, so attenuation is assumed to have
+occurred. A field named <code>signature</code> is populated with the string <code>unsigned</code>. A
+component named for auditing is assumed to produce an audit record. A citation is
+present, so evidence is assumed to exist behind it.</p>
+<blockquote>
+<p><strong>M1.1.</strong> The absence of a check, and a proxy for a check, are both
+non-measurements. A verifier that checked nothing MUST NOT report valid. A
+signal merely <em>correlated</em> with verification — a digest, a label, a declared
+directive, a name in an architecture, a citation nobody resolved — MUST NOT be
+recorded as verification. <strong>The honest result for non-execution must be a
+distinct value, never the passing one.</strong></p>
+</blockquote>
+<p>The third value is not an invention of this doctrine: three-valued runtime
+verification has carried <code>inconclusive</code> for two decades (§<em>Related work</em>). But
+<code>inconclusive</code> is not the value most of these failures need, and collapsing the
+two is itself an M1.1 error:</p>
+<ul>
+<li><strong><code>INCONCLUSIVE</code></strong> — the check ran; the evidence it obtained was insufficient to
+  decide.</li>
+<li><strong><code>NOT_MEASURED</code></strong> — the check did not run, or could not reach what it was
+  supposed to examine.</li>
+</ul>
+<p>Every one of the eleven findings in the linked self-audit belongs to the second
+category. A verdict type offering only the first has nowhere honest to put them.</p>
+<h4>The verdict algebra</h4>
+<p>The operational product of M1.1 is a verdict type the caller cannot collapse:</p>
+<table>
+<thead>
+<tr>
+<th>Verdict</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PASS</code></td>
+<td>the check ran and its success criterion was met</td>
+</tr>
+<tr>
+<td><code>FAIL</code></td>
+<td>the check ran and its success criterion was not met</td>
+</tr>
+<tr>
+<td><code>NOT_MEASURED</code></td>
+<td>the check did not run, or its required input was unobtainable</td>
+</tr>
+<tr>
+<td><code>INCONCLUSIVE</code></td>
+<td>the check ran; the evidence did not decide</td>
+</tr>
+<tr>
+<td><code>ERROR</code></td>
+<td>the check could not complete for a technical reason</td>
+</tr>
+<tr>
+<td><code>NOT_APPLICABLE</code></td>
+<td>out of scope by a documented decision</td>
+</tr>
+</tbody>
+</table>
+<p>Two rules make the type load-bearing rather than decorative:</p>
+<blockquote>
+<p>A caller MUST handle <code>NOT_MEASURED</code>, <code>INCONCLUSIVE</code> and <code>ERROR</code> distinctly from
+<code>PASS</code>. An aggregate that maps any of them to <code>PASS</code> — by default, by
+truthiness, by <code>or False</code>, or by omission from a summary — has re-created the
+defect the type exists to prevent.</p>
+<p><code>NOT_APPLICABLE</code> MUST carry the scope decision that justifies it. Without one it
+is <code>NOT_MEASURED</code> wearing a better name.</p>
+</blockquote>
+<p>The contribution is not the third value. It is the separation above, plus the
+observation that the passing value is used where <code>NOT_MEASURED</code> belongs:
+<strong>§VII reports eleven instances of this in one governance runtime — ours.</strong> Whether
+it is a systematic property of the class is not something eleven findings in one
+system can establish, and we do not claim it.</p>
+<h3>M2 — The deciding layer must not be the measured layer</h3>
+<p>An independently checkable control layer overrules probabilistic generation. If
+the constraint rejects the output, the output changes. <em>(In Phionyx that layer is
+symbolic and deterministic; the axiom requires independent checkability, not any
+particular implementation.)</em></p>
+<p><strong>A language model judging a language model is a sensor — not, by itself, an
+independently checkable governance layer.</strong> It may supply measurement evidence,
+often good evidence. What it cannot be alone is the authority, because it shares a
+failure family with what it judges.</p>
+<blockquote>
+<p>A probabilistic evaluator MAY provide measurement evidence, but MUST NOT be the
+sole authority for an irreversible state transition unless its verdict is
+independently constrained, attributable and replayable.</p>
+</blockquote>
+<p>A system whose only oversight is another model has two measurements and a hope
+that they fail independently.</p>
+<p>And the corollary that binds the author as much as anyone: <strong>if the deciding layer
+is not itself checkable, trust has been relocated, not reduced.</strong></p>
+<h3>M3 — Order is the invariant</h3>
+<p><code>build context → generate → validate → if allowed, commit.</code></p>
+<p>The load-bearing word is <em>order</em>. Possessing the steps is not running them in
+sequence, and <strong>the distance between an architecture diagram and a runtime is
+exactly this axiom</strong>. &ldquo;We have a safety check&rdquo; and &ldquo;the safety check runs before
+the action, every time, and the record proves it&rdquo; are different claims. The second
+is rarely made because it is rarely checkable; making it checkable is the work.</p>
+<p>A declared order that no assertion enforces is documentation. An order followed by
+a sequential loop is a convention. Only an order asserted against an <strong>observed
+execution trace</strong> is an invariant.</p>
+<h3>M4 — Evaluation is unconditional</h3>
+<blockquote>
+<p>Every governance-relevant decision and every state-changing action MUST be
+accompanied by a recorded <code>measurement_status</code> drawn from the algebra in M1.1.
+The decision outcome and the execution status MUST be recorded separately —
+an action does not itself produce <code>PASS</code> or <code>NOT_MEASURED</code>; its evaluation does.</p>
+</blockquote>
+<p>The point is not that every interaction is scored — many change no state, call no
+tool and decide nothing. The point is that <strong>the set of turns the evaluator never
+saw must itself be recorded</strong>, rather than being inferred from the absence of a
+finding. The risk dimensions may be profile-bound. Under M6 a profile MAY add dimensions
+to the applicable baseline schema but MUST NOT remove any the schema designates
+mandatory. This doctrine does not fix that baseline schema; naming it belongs to a
+specification, not to an axiom.</p>
+<p>Tiered evaluation, where a cheap scorer decides whether an expensive deliberative
+check runs, is a legitimate engineering choice with a property that must be stated
+rather than discovered: <strong>the component deciding whether to look closely is the
+component being looked at.</strong> Anything the cheap scorer rates low is never seen by
+the layer built to catch what cheap scorers miss.</p>
+<p>Stating that as a limitation is not sufficient. By M5, a limitation with no
+mechanism attached is a warning. The mechanism that discharges it is a recorded,
+replayable attestation naming the turns the deliberative layer never saw.</p>
+<h3>M5 — A warning without damping is invalid</h3>
+<p>Forced attenuation must be real: reduce amplitude, raise the uncertainty floor,
+override tone. <strong>A warning that changes nothing is not weak governance; it is
+invalid governance</strong>, in the sense that an unsigned contract is not a weak
+contract.</p>
+<p><strong>The scope is enforcement, not disclosure.</strong> A policy document, a model card or
+a risk register is an <em>advisory control</em>: its job is to inform, and it discharges
+that job without touching the runtime. M5 does not invalidate those.</p>
+<p>What M5 governs is the second class:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Advisory control</strong></td>
+<td>informs a human or a downstream process; valid without runtime effect</td>
+</tr>
+<tr>
+<td><strong>Intervention control</strong></td>
+<td>claims to constrain the system; valid only if it materially changes the system&rsquo;s output, action, state transition, authority or control flow</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>A runtime mitigation verdict that produces no material change to the system&rsquo;s
+output, action, state transition, authority or control flow MUST NOT be
+represented as an enforced mitigation.</p>
+</blockquote>
+<p>The failure this catches is the reclassification: an advisory control presented,
+in an audit or a compliance mapping, as though it were an intervention. A
+governance finding that changes no system behaviour is a finding about the
+organisation, not an intervention control on the system.</p>
+<h3>M6 — Context changes thresholds, never rules</h3>
+<p>Deployment profiles adjust strictness. They never remove a rule.</p>
+<p>&ldquo;We relaxed the guardrails for this deployment&rdquo; collapses two different acts.
+Lowering a threshold is bounded and auditable: the rule still runs, the record
+shows that it ran, and the profile that set the threshold is itself an artefact
+someone can read. Removing a rule leaves <strong>no trace of what is no longer being
+checked</strong>. Only the first is defensible, and the difference is invisible unless the
+architecture enforces it.</p>
+<h3>M7 — Decision evidence must be replayable</h3>
+<blockquote>
+<p>A record supporting a claim of independently reproducible governance MUST
+contain sufficient inputs to re-derive the measurement mapping, the verdict and
+the state transition.</p>
+</blockquote>
+<p>A record that cannot be replayed is still a record and may still be probative. It
+is not <em>replayable decision evidence</em>, and a system should not describe it as
+though it were.</p>
+<p>The defensible form of this claim is not &ldquo;deterministic AI&rdquo; — that invites a weak
+reading and is false anyway. It is:</p>
+<blockquote>
+<p><strong>Deterministic governance around probabilistic generation.</strong></p>
+</blockquote>
+<p>The model may be stochastic. The draw is recorded. The same record replayed must
+yield the same governance verdict. What is required is determinism <em>at the verdict
+layer</em>, which is achievable precisely because that layer is code rather than a
+model (M2).</p>
+<p><strong>Evidence is graded, not binary.</strong> A record without a signature is still a
+record and may still be probative; what changes across the levels is what an
+independent party can establish from it.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Level</th>
+<th>What it supports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E0</strong></td>
+<td>Raw record</td>
+<td>the producer&rsquo;s own account</td>
+</tr>
+<tr>
+<td><strong>E1</strong></td>
+<td>Integrity-protected</td>
+<td>it has not been altered undetectably</td>
+</tr>
+<tr>
+<td><strong>E2</strong></td>
+<td>Key-attributable</td>
+<td>which key signed it</td>
+</tr>
+<tr>
+<td><strong>E3</strong></td>
+<td>Identity-bound and independently verifiable</td>
+<td>a third party can bind that key to an identity and check it without the producer</td>
+</tr>
+<tr>
+<td><strong>E4</strong></td>
+<td>Replayable attested decision</td>
+<td>the verdict can be re-derived from the record</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The levels are cumulative.</strong> An E4 claim requires E0 through E3 in addition to
+replayability; a record that replays but carries no attribution is not E4.</p>
+<p><strong>E3 begins to support a non-repudiation claim</strong>, subject to the applicable
+identity, trust and legal context — it does not establish one by itself. And it is
+not achieved by taking the key away from the producer: a producer holding its own
+private key is normal and correct.
+What E3 requires is: secure custody of the private key, the public key bound to a
+verified identity, an independent trust anchor, a recorded rotation and
+revocation history, and an unambiguous statement of what was signed and when.</p>
+<p><strong>Most systems do not say which level they are at.</strong> A claim of &ldquo;signed audit
+trail&rdquo; spans E1 to E4 and means something different at each.</p>
+<hr />
+<h2>III. Five properties of a governance measurement path</h2>
+<p>The axioms state what must hold. These five properties characterise the path by
+which a measurement is persisted, propagated and allowed to affect a system. They
+are not all evidence requirements, and which combination is mandatory depends on
+the decision type.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Property</th>
+<th>The question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P1</strong></td>
+<td><strong>Persistence</strong></td>
+<td>Does the step write a value that outlasts it?</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td><strong>Delay</strong></td>
+<td>Does the effect extend beyond the immediate call?</td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td><strong>Propagation</strong></td>
+<td>Does any reader receive <em>that exact</em> value?</td>
+</tr>
+<tr>
+<td><strong>P4</strong></td>
+<td><strong>Selectivity</strong></td>
+<td>Does the output vary with the input?</td>
+</tr>
+<tr>
+<td><strong>P5</strong></td>
+<td><strong>Feedback</strong></td>
+<td>Does the value reach a branch, or only a log line?</td>
+</tr>
+</tbody>
+</table>
+<p>They are <strong>conservatively approximable</strong> by static analysis rather than decidable —
+exact reader- and branch-reachability are undecidable in general, so an
+implementation yields sound over-approximations. That is sufficient: a governance
+defect surviving a sound over-approximation is a defect worth reporting.</p>
+<p><strong>P2 is not an evidence requirement.</strong> Delay is a real property of an effect and
+belongs in the set for completeness, but a measurement produced, persisted,
+propagated and acted on within a single call is not weaker evidence for being
+prompt. The evidence gate below draws on <strong>P1, P3, P4, P5</strong> plus two properties
+carried by M7 — <strong>attribution</strong> and <strong>replayability</strong>. Delay, long-horizon
+propagation and retroactive reinterpretation are temporal properties of the
+system, treated in §IV, not conditions on a record being evidence.</p>
+<h3>P4 is the load-bearing property, and it must be quantified correctly</h3>
+<p>A naïve selectivity pass finds almost nothing, because the components that fail
+this test <em>do</em> vary with their inputs in general. They are constant only within a
+<strong>degenerate class</strong>: the empty collection, the absent baseline, the missing file,
+the unreadable source, the unset optional argument.</p>
+<p>But invariance over that class is not itself the defect — a component that
+correctly answers <em>not measured</em> to every degenerate input is invariant too, and
+is behaving exactly as required.</p>
+<blockquote>
+<p><strong>The check is a control input paired with its degenerate variant.</strong> Selectivity
+holds when the mapping distinguishes what it is required to distinguish: the
+control yields a measured result, the degenerate one yields <em>not measured</em>, and
+the degenerate one does not inherit the control&rsquo;s pass.</p>
+</blockquote>
+<p>Only the pair separates a component that refuses to guess from one that never
+looked.</p>
+<h3>Why a threshold is the wrong gate</h3>
+<p>First, a distinction that is easy to lose. A <strong>demarcation test</strong> asks whether a
+phenomenon belongs to a class — it is answering a question about something you did
+not design, and a count is a reasonable instrument for it. A <strong>conformance gate</strong>
+asks whether a particular instance is adequate — you designed this one, and you
+know which property is load-bearing for it. Using a demarcation threshold as a
+conformance gate is a category error, and the properties below are being put to
+the second use, not the first.</p>
+<p>The temptation is to require &ldquo;at least three of five&rdquo;. Take a chain verifier that
+returns <code>valid</code> for an empty chain:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1 Persistence</td>
+<td>no record of the verdict is written</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>P2 Delay</td>
+<td>no effect beyond this call</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>P3 Propagation</td>
+<td>the verdict reaches the caller</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>P4 Selectivity</strong></td>
+<td><strong>the empty input inherited the valid control&rsquo;s passing outcome</strong></td>
+<td>❌</td>
+</tr>
+<tr>
+<td>P5 Feedback</td>
+<td>the caller branches on it</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p>Two of five here — but move P1 to &ldquo;the verdict persists into the caller&rsquo;s
+decision&rdquo;, a reading the property equally supports, and it scores three and passes.
+<strong>A count is decided by which reading you pick. The defect is not.</strong></p>
+<p>Requiring all five fails in the other direction: <strong>P2 is not always desirable.</strong> A
+verdict that correctly changes nothing downstream is a correct verdict. Requiring
+all five forces every decision to mutate state in order to pass.</p>
+<p><strong>Gate on named properties, chosen by decision type:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Decision type</th>
+<th>Required</th>
+<th>Conditional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A <strong>measurement verdict</strong> — gate, verifier, monitor</td>
+<td><strong>P4 through paired control–degenerate tests</strong>, <strong>P1</strong></td>
+<td>P3, when a consumer must act on it</td>
+</tr>
+<tr>
+<td>An <strong>intervention verdict</strong> — claims to constrain the system</td>
+<td>P4 (paired), P1, <strong>P3, P5</strong></td>
+<td>attribution and replay, per the assurance claim made</td>
+</tr>
+<tr>
+<td>An <strong>action</strong> — tool call, state write</td>
+<td>P1, P3</td>
+<td>P5, when the outcome should update a model</td>
+</tr>
+<tr>
+<td>An <strong>answer</strong> — no side effects</td>
+<td>P1, bounded as below</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>P1 is bounded by retention, not by universality.</strong> Persisting every output
+conflicts with data minimisation and with legitimate ephemeral processing. The
+requirement is narrower:</p>
+<blockquote>
+<p>A claim represented as auditable assurance MUST persist for the retention period
+required to verify that claim.</p>
+</blockquote>
+<p>An answer that makes no assurance claim need not be retained at all.</p>
+<hr />
+<h2>IV. Decision, time and remedy</h2>
+<p>The axioms govern what a verdict must be. These four govern what a <em>record</em> must
+contain for the decision to remain accountable afterwards.</p>
+<h3>D1 — Reproducibility is keyed on the decision, not the clock</h3>
+<blockquote>
+<p><em>The wheel carries the decision, not the clock.</em></p>
+</blockquote>
+<p>A replay keyed on wall-clock time is irreproducible by construction: time has
+moved. A replay keyed on the recorded decision inputs — state, policy version,
+profile, thresholds, measurements, and the recorded time value <strong>as one of those
+inputs</strong> — reproduces faithfully from the record itself.</p>
+<p>This is what makes M7 achievable rather than aspirational, and it is the property
+that separates an evidence record from a timestamped log.</p>
+<h3>D2 — There is no null action</h3>
+<blockquote>
+<p><em>Every decision moves the wheel.</em></p>
+</blockquote>
+<p>Abstention is a decision. So are timeout, tool-unavailability, policy-not-loaded,
+human-override, and silent failure. Each must be recorded as a distinct outcome:</p>
+<p>These are <strong>not one enumeration.</strong> They are orthogonal dimensions of a single
+event, and a record that collapses them into one field cannot express what
+happened:</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>decision outcome</td>
+<td><code>allow</code> · <code>block</code> · <code>attenuate</code> · <code>escalate</code> · <code>abstain</code></td>
+</tr>
+<tr>
+<td>measurement status</td>
+<td>the verdict algebra of M1.1</td>
+</tr>
+<tr>
+<td>execution status</td>
+<td><code>completed</code> · <code>timeout</code> · <code>tool_unavailable</code> · <code>policy_unavailable</code> · <code>failed</code></td>
+</tr>
+<tr>
+<td>authority</td>
+<td><code>autonomous</code> · <code>human_confirmed</code> · <code>human_overridden</code></td>
+</tr>
+<tr>
+<td>observation</td>
+<td><code>recorded</code> · <code>detected_after_execution</code> · <code>previously_silent_failure</code></td>
+</tr>
+</tbody>
+</table>
+<p>A single event can carry <code>decision: block</code>, <code>measurement: inconclusive</code>,
+<code>execution: completed</code> and <code>authority: human_overridden</code> at once.</p>
+<p>Most logging systems today cannot distinguish <strong>&ldquo;no record exists&rdquo;</strong> from <strong>&ldquo;the
+system deliberately declined&rdquo;</strong>. Under M1.1 that is the same defect as a vacuous
+pass: an absence read as a state it was never shown to be.</p>
+<h3>D3 — The trace is immutable; its meaning is not</h3>
+<blockquote>
+<p><em>The past is not corrupted, but its echo is rewritten.</em></p>
+</blockquote>
+<p>Audit integrity and post-market learning appear to conflict: integrity demands that
+records never change, learning demands that a past decision be re-evaluated when
+new evidence arrives. The conflict dissolves once the two are separated:</p>
+<pre><code>recorded event
+  ├─ immutable payload
+  ├─ the verdict as issued
+  ├─ integrity chain
+  └─ interpretation revisions   (append-only, each dated and attributed)
+       ├─ revision 1 — policy changed
+       ├─ revision 2 — incident evidence
+       └─ revision 3 — external audit finding
+</code></pre>
+<p>History is never edited. Meaning is versioned alongside it. <strong>A system that
+rewrites a record to correct an interpretation has destroyed the evidence it was
+correcting.</strong></p>
+<h3>D4 — Irreversibility is not irremediability</h3>
+<blockquote>
+<p><em>Once the wheel turns it cannot be turned back. The scales, you can still
+balance.</em></p>
+</blockquote>
+<p>A control plane built only for prevention is incomplete. Once an action has
+occurred, the governance question is no longer whether to allow it but what
+remediation, compensation or containment is owed — and whether that path exists, is
+recorded, and can be shown to have been taken.</p>
+<p>Prevention that fails silently and offers no remedy is not a control. It is a
+prevented-in-principle claim.</p>
+<hr />
+<h2>V. Reflexive assurance</h2>
+<h3>R1 — An assurance claim is itself subject to evidence verification</h3>
+<p>The axioms turn on their author. Applied reflexively:</p>
+<ul>
+<li>An agent&rsquo;s <em>&ldquo;I did it&rdquo;</em> is a sensor reading, not a fact.</li>
+<li>A project&rsquo;s <em>&ldquo;we are compliant&rdquo;</em> is a claim, not evidence.</li>
+<li><strong>Having authored a standard is not conformance to it.</strong></li>
+<li>A module named <code>audit_layer</code> producing an audit record is an assumption, not an
+  observation.</li>
+<li>A compliance mapping citing evidence is not evidence; <strong>the citation has to
+  resolve.</strong></li>
+</ul>
+<p>The term for the discipline this requires:</p>
+<blockquote>
+<p><strong>Reflexive Conformance Assurance</strong> — every assurance claim is itself subject to
+the evidence standard it asserts.</p>
+</blockquote>
+<h3>R2 — Independent reading is a mechanism, not a courtesy</h3>
+<p>A blind spot is by definition invisible to the system that has it. In the audit
+reported in §VII, <strong>every finding of this class was surfaced by an independent
+reader of the same source — never by the system&rsquo;s own gates</strong>, which were running,
+were correctly configured, and were structurally incapable of noticing.</p>
+<p><strong>Independent reading</strong> means a review path operationally separate from the
+implementation and from its existing gates. It does not by itself constitute
+independent assessment under Boundary 2.</p>
+<p>This is not an argument for more review. It is an argument that <strong>independent
+reading is a required control with a defined trigger</strong>, and that a governance
+architecture which does not budget for it has an unclosable gap by construction.</p>
+<hr />
+<h2>VI. Boundaries</h2>
+<p>Normative limits on what may be claimed under this doctrine.</p>
+<ol>
+<li><strong>No consciousness claim.</strong> Nothing here depends on machine consciousness,
+   implies it, or is evidence for it. Where the underlying framework uses
+   phenomenological vocabulary, that vocabulary is internal definition, not
+   assertion about experience.</li>
+<li><strong>Conformance is not self-awarded, and the word is used precisely.</strong> Standards practice recognises first-, second- and third-party assessment, and conformance is not the same thing as certification. This doctrine does not redefine that vocabulary; it reserves a term within it. Positions are stated on the ladder <code>mapped</code> → <code>self_assessed</code> → <code>self_declared_conformance</code> → <code>independently_assessed</code> → <code>third_party_verified</code> → <code>certified</code>, and never above the rung reached. <strong>Under this doctrine the term <em>verified conformance</em> is reserved for named independent assessment.</strong> Mapping a system against a standard is <code>mapped</code>; authoring a standard is neither.</li>
+<li><strong>No conformance to unpublished drafts.</strong> A standard at draft stage can be
+   contributed to; it cannot be conformed to, by anyone.</li>
+<li><strong>No coverage claim without a named search domain.</strong> &ldquo;No standard covers X&rdquo; and
+   &ldquo;this does not exist&rdquo; are claims about where one looked. The domain must be
+   stated or the claim withdrawn.</li>
+<li><strong>These axioms are not proven.</strong> They are a design stance whose consequences are
+   checkable. They are not theorems and nothing derives them.</li>
+<li><strong>The set is open.</strong> M1.1 exists because M1 was incomplete. Further
+   incompleteness is expected and will be published as it is found.</li>
+</ol>
+<hr />
+<h2>VII. Self-audit: summary</h2>
+<p>A doctrine that has never been turned on its author is marketing. On 1 August 2026
+we audited Phionyx&rsquo;s own governance runtime against these axioms, reading source
+rather than documentation.</p>
+<p><strong>The audit identified eleven instances in which a component or an assurance
+artefact represented a non-measurement as a positive or completed result</strong>, in two
+families: <em>absence read as confirmation</em> (five) and <em>proxy read as the thing</em>
+(six). Applying P1–P5 to the same execution graph surfaced at least four further
+defects of a different kind — values written and never read, computed and never
+branched on, or guarded by a detector reading a field that is empty everywhere.</p>
+<p>The sharpest of the eleven is the one that concerns this document directly. We
+published a compliance mapping rating a control <strong>Full</strong> on four cited evidence
+artefacts, none of which has ever existed in any repository that could hold them.
+Our own specification contains the rule that forbids exactly this:</p>
+<blockquote>
+<p><em>&ldquo;A verifier MUST NOT treat an entry with <code>resolvable: false</code> as verified
+evidence. This prevents an unverifiable pointer from being counted as proof.&rdquo;</em>
+— AIREP v0.1 §4</p>
+</blockquote>
+<p>We wrote that rule, then broke it in prose, in a public document. Nobody resolved
+the pointers; the presence of an evidence block was read as the presence of
+evidence. That is R1, and it is why R1 exists.</p>
+<pre><code class="language-yaml">claim_status:                SUPPORTED_NARRATIVE
+independent_reproducibility: NOT_MEASURED
+</code></pre>
+<p><strong>Full findings, per-finding detail and where each can be checked:</strong>
+<a href="./PHIONYX_MEASUREMENT_AXIOMS_SELF_AUDIT_2026-08-01.md">Phionyx self-audit, 1 August 2026</a>.</p>
+<h3>The measured position</h3>
+<p>The framework does not certify us. Our conformance register separates what a single
+ratio would hide:</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Measured</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What each foundation item requires of us</td>
+<td>14 of 31</td>
+</tr>
+<tr>
+<td>Whether our code does it</td>
+<td>6 of 31</td>
+</tr>
+<tr>
+<td>How it relates to an external framework</td>
+<td>2 of 31</td>
+</tr>
+<tr>
+<td><strong>Whether a third party has evaluated us</strong></td>
+<td><strong>0 of 31</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The last row is the one that governs. Under <strong>Boundary 2</strong> it stays at zero until an
+independent assessment exists.</p>
+<hr />
+<h2>Related work</h2>
+<p>The formal core of M1.1 has been established for decades. This doctrine&rsquo;s
+contribution is its application to AI governance runtimes and the reported
+self-audit findings in §VII, not the underlying results.</p>
+<ul>
+<li><strong>Three-valued runtime verification.</strong> LTL₃ carries <code>true</code>, <code>false</code> and
+  <strong><code>inconclusive</code></strong> over partial observations — Bauer, Leucker &amp; Schallhart,
+  <em>Runtime Verification for LTL and TLTL</em>, ACM TOSEM 2011; monitorability, Pnueli &amp;
+  Zaks, FM 2006. LTL₃ establishes that partial observation need not collapse into
+  <code>true</code> or <code>false</code>, and this doctrine adopts that refusal to collapse. It does not
+  adopt the value: <code>INCONCLUSIVE</code> denotes a check that ran without deciding,
+  whereas <code>NOT_MEASURED</code> denotes a check that did not execute or could not reach
+  its object. <strong>What is new here is not a third value but the separation of
+  non-execution from inconclusive observation as a distinct governance verdict.</strong></li>
+<li><strong>Vacuity detection.</strong> &ldquo;The property passed without being exercised&rdquo;, formalised —
+  Beer, Ben-David, Eisner &amp; Rodeh, FMSD 2001; Kupferman &amp; Vardi, STTT 2003.</li>
+<li><strong>Fail-safe defaults.</strong> Deny on failure rather than permit — Saltzer &amp; Schroeder,
+  <em>The Protection of Information in Computer Systems</em>, Proc. IEEE 1975, design
+  principle 2.</li>
+<li><strong>Measurement validity for AI evaluation.</strong> Jacobs &amp; Wallach, <em>Measurement and
+  Fairness</em>, FAccT 2021.</li>
+<li><strong>Assurance and safety cases.</strong> GSN and confidence arguments already treat evidence
+  sufficiency as a first-class object; M7 will be contested from that direction,
+  reasonably.</li>
+<li><strong>Replayable attestation.</strong> in-toto, SLSA provenance, Sigstore/Rekor, W3C PROV-O —
+  signed per-step evidence rather than logs. This is the shape M7 and D1 argue AI
+  observability should adopt.</li>
+<li><strong>Tamper-evident logging.</strong> Haber &amp; Stornetta 1991; Crosby &amp; Wallach, USENIX
+  Security 2009.</li>
+<li><strong>NIST AI RMF 1.0, MEASURE 1.1</strong>: <em>&ldquo;the risks or trustworthiness characteristics
+  that will not – or cannot – be measured are properly documented.&rdquo;</em> This is a
+  disclosure duty on the organisation. M1.1 is a type constraint on the verdict. A
+  deployment can satisfy MEASURE 1.1 in full and still ship a verifier returning
+  <code>valid</code> after checking nothing — because that is not a risk anyone <em>decided</em> not
+  to measure; it is a measurement that silently did not happen and was never
+  enumerated.</li>
+</ul>
+<p>Where P1–P5 overlap with classical dataflow analysis — def-use chains, reachability,
+liveness — they overlap completely. The contribution is where they are pointed.</p>
+<hr />
+<h2>How to use this document</h2>
+<p><strong>As a design discipline.</strong> Take any component in a governance path and ask three
+questions in order: <em>Does its verdict vary with its input, including when the input
+is empty or absent? Does the verdict reach something that acts on it? Can the
+decision be re-derived from the record?</em> A component failing the first is not
+measuring. Failing the second is not governing. Failing the third is not producing
+evidence.</p>
+<p><strong>As a review instrument.</strong> §VII is a worked example. The eleven findings take four
+shapes, and those shapes recur: vacuous pass, fabricated denominator, unverified
+proxy recorded as verified, and named-but-absent behaviour.</p>
+<p><strong>As a map.</strong> Where this doctrine sits relative to a runtime that applies it and
+a protocol that carries its records — and the two directions the relationship does
+<em>not</em> run — is set out in
+<a href="./THE_EVIDENCE_STACK.md">The Evidence Stack</a>.</p>
+<p><strong>As a normative specification.</strong> The requirements implied by this doctrine are
+extracted, numbered and made testable in
+<a href="./spec/measurement-axioms/v1.0/MEASUREMENT_AXIOMS_SPECIFICATION.md">Governance Verdict Validity — Normative Specification v1.0</a>,
+with a machine-readable record schema and a conformance requirement set beside it.
+Where the doctrine argues, the specification requires.</p>
+<p><strong>As a standards position.</strong> Six statements here are executable, testable, and
+address gaps we did not find closed in the frameworks named in <em>Related work</em>.
+That search domain is small and stated so it can be attacked:</p>
+<ol>
+<li>Absence of evidence must not be serialised as positive assurance. <em>(M1.1)</em></li>
+<li>A measured risk must reach a control branch. <em>(P5)</em></li>
+<li>A warning without material mitigation is invalid. <em>(M5)</em></li>
+<li>A recorded value must reach its intended consumer. <em>(P3)</em></li>
+<li>Probabilistic generation can carry deterministic governance replay. <em>(M7, D1)</em></li>
+<li>Every assurance claim must itself be independently evidenced. <em>(R1)</em></li>
+</ol>
+<p><strong>As something to attack.</strong> The axioms are engineering claims. If one fails against
+its own author, that is the intended use, and we will publish the failure rather
+than the correction. §VII is what that looks like.</p>
+<hr />
+<p><em>Phionyx is the reference implementation of this doctrine, not its proof. The
+doctrine is intended to outlive any particular implementation, including ours.</em></p>
+</main>
+
+<script>
+(function () {
+  // wrap tables so wide content scrolls inside itself, never the page
+  document.querySelectorAll('table').forEach(function (t) {
+    var w = document.createElement('div');
+    w.className = 'table-wrap';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  });
+})();
+</script>
+
+</body>
+</html>

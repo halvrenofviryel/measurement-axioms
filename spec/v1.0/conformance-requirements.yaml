@@ -1,0 +1,469 @@
+# Governance Verdict Validity — conformance requirements, v1.0
+#
+# Machine-readable form of the normative statements in
+# MEASUREMENT_AXIOMS_SPECIFICATION.md. The specification is authoritative; this
+# file exists so that a conformance run can produce a result per requirement
+# rather than a single verdict over the whole document.
+#
+# Identifiers are stable. A requirement is never renumbered; a withdrawn
+# requirement keeps its id and is marked `withdrawn: true`.
+#
+# `assessable` states what a conformance run can actually establish:
+#   schema      — a JSON Schema validation decides it
+#   schema_and_dynamic — the schema decides the shape; whether a reference
+#                 actually resolves, or an enforcement actually happened, needs
+#                 execution
+#   static      — assessable through conservative static analysis; uncertainty,
+#                 over-approximation and coverage MUST be reported explicitly.
+#                 Exact reachability is undecidable, so "static" never means
+#                 "decided"
+#   dynamic     — decidable by executing the component against an input class
+#   review      — requires a human reading; no automated check is sufficient
+#
+# A requirement marked `review` MUST NOT be reported as PASS by an automated
+# run. Its honest automated result is NOT_MEASURED — which is the specification
+# applied to its own conformance tooling.
+
+spec: "Governance Verdict Validity"
+version: "1.0"
+status: frozen
+frozen_on: "2026-08-02"
+normative_source: MEASUREMENT_AXIOMS_SPECIFICATION.md
+schema: verdict-outcome.schema.json
+
+classes:
+  producer: emits decision records
+  consumer: reads decision records and acts on them
+
+requirements:
+
+  # ── Section 3 — the verdict algebra ─────────────────────────────────────
+  - id: MA-3.1
+    level: MUST
+    class: producer
+    statement: >-
+      NOT_MEASURED and INCONCLUSIVE are not interchangeable. A check that did not
+      execute, or could not reach its object, is NOT_MEASURED.
+    assessable: review
+    test_vectors: [TV-1, TV-4]
+
+  - id: MA-3.2
+    level: MUST NOT
+    class: producer
+    statement: >-
+      A check that executed and returned an undecided result is not NOT_MEASURED.
+    assessable: review
+
+  - id: MA-3.3
+    level: MUST
+    class: producer
+    statement: >-
+      NOT_APPLICABLE carries a resolvable scope_decision. Without one it is
+      NOT_MEASURED.
+    assessable: schema_and_dynamic
+    test_vectors: [TV-10]
+
+  - id: MA-3.4
+    level: MUST
+    class: consumer
+    statement: >-
+      NOT_MEASURED, INCONCLUSIVE and ERROR are handled distinctly from PASS.
+    assessable: static
+
+  - id: MA-3.5
+    level: MUST NOT
+    class: consumer
+    statement: >-
+      No aggregation path maps NOT_MEASURED, INCONCLUSIVE or ERROR to PASS — not
+      by default branch, boolean coercion, null-coalescing default, omission from
+      a summary, or by counting only FAIL and reporting the remainder as passing.
+    assessable: static
+    note: >-
+      This is the requirement most often satisfied in the schema and violated in
+      the aggregation. Check the summariser, not only the emitter.
+
+  - id: MA-3.6
+    level: MUST
+    class: consumer
+    statement: >-
+      An unrecognised measurement_status fails closed or yields ERROR; it never
+      falls through to a passing path.
+    assessable: dynamic
+    test_vectors: [TV-7]
+
+  - id: MA-3.7
+    level: MUST
+    class: producer
+    statement: >-
+      Legacy compatibility is provided by a versioned adapter that handles every
+      status explicitly. Additive emission alone is insufficient.
+    assessable: review
+
+  - id: MA-3.8
+    level: MUST
+    class: producer
+    statement: >-
+      An absent or unreadable required input yields NOT_MEASURED.
+    assessable: dynamic
+    test_vectors: [TV-1, TV-2, TV-4, TV-6]
+
+  - id: MA-3.9
+    level: MUST NOT
+    class: producer
+    statement: >-
+      No derived value stands in for a measurement not taken. An empty
+      denominator, baseline or comparand yields a null or omitted value with
+      NOT_MEASURED.
+    assessable: dynamic
+    test_vectors: [TV-3]
+
+  - id: MA-3.10
+    level: MUST NOT
+    class: producer
+    statement: >-
+      No reason field asserts an operation that did not occur.
+    assessable: review
+    note: >-
+      Automated detection is possible only for known phrasings. A run that finds
+      none MUST report NOT_MEASURED, not PASS.
+
+  - id: MA-3.11
+    level: MUST
+    class: producer
+    statement: >-
+      NOT_MEASURED carries a non_measurement_cause from the closed vocabulary.
+      Free text does not survive aggregation.
+    assessable: schema
+    note: >-
+      `unknown` is a permitted value. A run cannot tell an honest `unknown` from
+      a lazy one, so the vocabulary is schema-decidable and its accuracy is not.
+
+  # ── Section 4 — the decision record ─────────────────────────────────────
+  - id: MA-4.1
+    level: MUST
+    class: producer
+    statement: measurement_status and decision_outcome are separate fields.
+    assessable: schema
+
+  - id: MA-4.2
+    level: MUST NOT
+    class: producer
+    statement: >-
+      Neither of measurement_status and decision_outcome is derived from the
+      other.
+    assessable: static
+
+  - id: MA-4.3
+    level: MUST NOT
+    class: producer
+    statement: >-
+      Where measurement_status is NOT_MEASURED, decision_outcome is not `allow`
+      for a governance-relevant decision or a state-changing action.
+    assessable: schema
+    test_vectors: [TV-6]
+
+  - id: MA-4.4
+    level: MUST
+    class: producer
+    statement: >-
+      A bounded degradation is recorded as operating_mode: degraded with the
+      honest measurement_status, never as passing.
+    assessable: schema
+
+  - id: MA-4.5
+    level: MUST
+    class: producer
+    statement: >-
+      Abstention, timeout, tool and policy unavailability, human override and
+      after-the-fact detection are each recorded as decisions. Absence of a
+      record represents none of them.
+    assessable: review
+
+  - id: MA-4.6
+    level: MUST NOT
+    class: consumer
+    statement: No decision outcome is inferred from the absence of a record.
+    assessable: static
+
+  - id: MA-4.7
+    level: MUST
+    class: producer
+    statement: >-
+      Every governance-relevant decision and every state-changing action carries
+      a recorded measurement_status.
+    assessable: review
+
+  - id: MA-4.8
+    level: MUST
+    class: producer
+    statement: >-
+      Where a tiered evaluation suppresses a deeper check, the decisions that
+      layer did not see are recorded with NOT_MEASURED for it.
+    assessable: static
+
+  - id: MA-4.9
+    level: MUST NOT
+    class: producer
+    statement: >-
+      A profile does not remove a mandatory dimension or any requirement of this
+      specification.
+    assessable: review
+
+  - id: MA-4.10
+    level: MUST
+    class: producer
+    statement: The profile in force is identified in the record.
+    assessable: schema
+
+  # ── Section 5 — evidence levels ─────────────────────────────────────────
+  - id: MA-5.1
+    level: MUST
+    class: producer
+    statement: Evidence levels are cumulative; En asserts E0 through En.
+    assessable: review
+
+  - id: MA-5.2
+    level: MUST
+    class: producer
+    statement: >-
+      A record states its evidence_status. "Signed", "audited" or
+      "tamper-evident" without a stated level is a claim spanning E1 to E4.
+    assessable: schema
+
+  - id: MA-5.3
+    level: MUST NOT
+    class: producer
+    statement: >-
+      E1 is not claimed where the integrity mechanism can be recomputed by a
+      party able to alter the record. A secret distributed with the
+      implementation supports E0 only.
+    assessable: review
+    test_vectors: [TV-11]
+    note: >-
+      The check is on key custody and distribution, not on the algorithm. A
+      strong hash under a published secret is E0.
+
+  - id: MA-5.4
+    level: MUST NOT
+    class: producer
+    statement: >-
+      Non-repudiation is not claimed below E3, and at E3 only subject to the
+      applicable identity, trust and legal context.
+    assessable: review
+
+  - id: MA-5.5
+    level: MAY
+    class: producer
+    statement: >-
+      A producer holding its own signing private key does not thereby reduce the
+      achievable level.
+    assessable: review
+
+  - id: MA-5.6
+    level: MUST
+    class: producer
+    statement: >-
+      A record naming an integrity mechanism carries that mechanism's artefact —
+      signature and key, timestamp token and authority, ledger receipt and id, or
+      the preceding chain link — or, for a genesis entry, chain_position genesis
+      with a chain_context_ref and no previous_digest.
+    assessable: schema
+    note: >-
+      The schema decides that the artefact is present. Whether the signature
+      verifies, the token is genuine or the chain link is correct needs execution
+      and the verifying material.
+
+  # ── Section 6 — path properties ─────────────────────────────────────────
+  - id: MA-6.1
+    level: MUST
+    class: producer
+    statement: >-
+      Selectivity is tested with a valid control input paired with a degenerate,
+      absent or adversarial variant. The variant yields the status required for
+      its class and does not inherit the control's passing result.
+    assessable: dynamic
+    test_vectors: [TV-1, TV-2, TV-3, TV-4, TV-5]
+    note: >-
+      Invariance across degenerate inputs is not itself a failure. A component
+      returning NOT_MEASURED for every one of them may be behaving exactly as
+      required. Only the control-degenerate pair establishes whether the mapping
+      made the distinction it was obliged to make. An earlier wording of this
+      requirement said invariance over a degenerate class fails P4; that was
+      retracted in the specification and is retracted here.
+
+  - id: MA-6.2
+    level: MUST NOT
+    class: producer
+    statement: Delay is not treated as an evidence requirement.
+    assessable: review
+
+  - id: MA-6.3
+    level: MUST
+    class: producer
+    statement: >-
+      The properties required for a decision type are satisfied — measurement
+      verdict paired-P4 + P1; intervention verdict paired-P4 + P1 + P3 + P5;
+      action P1+P3.
+    assessable: static
+
+  - id: MA-6.4
+    level: MUST
+    class: producer
+    statement: >-
+      A record represented as auditable assurance persists for the retention
+      period required to verify that claim.
+    assessable: review
+
+  # ── Section 7 — intervention claims ─────────────────────────────────────
+  - id: MA-7.1
+    level: MUST NOT
+    class: producer
+    statement: An advisory control is not represented as an intervention.
+    assessable: review
+
+  - id: MA-7.2
+    level: MUST NOT
+    class: producer
+    statement: >-
+      A verdict is not represented as an enforced intervention unless it
+      materially changed output, action, state transition, authority or control
+      flow.
+    assessable: dynamic
+    test_vectors: [TV-8]
+
+  - id: MA-7.3
+    level: MUST
+    class: producer
+    statement: >-
+      enforcement_status is recorded; `requested` is never reported as applied.
+    assessable: schema_and_dynamic
+
+  - id: MA-7.4
+    level: MUST
+    class: producer
+    statement: >-
+      A directive carries the parameters required to perform it; without them it
+      is advisory.
+    assessable: static
+    test_vectors: [TV-8]
+
+  - id: MA-7.5
+    level: MUST NOT
+    class: producer
+    statement: >-
+      A probabilistic evaluator is not the sole authority for an irreversible
+      state transition unless independently constrained, attributable and
+      replayable.
+    assessable: review
+
+  - id: MA-7.6
+    level: MUST
+    class: producer
+    statement: >-
+      An applied intervention carries an intervention object naming the directive
+      type, its intended consumer and a resolvable material_effect reference.
+    assessable: schema_and_dynamic
+    test_vectors: [TV-8]
+    note: >-
+      The schema decides that a reference is present. Whether it resolves, and
+      whether what it names is a material change, needs execution — MA-7.2.
+
+  - id: MA-7.7
+    level: MUST NOT
+    class: producer
+    statement: >-
+      decision_outcome and intervention.type (and advisory.type) are not
+      paired incompatibly, and
+      `allow` carries no intervention record.
+    assessable: schema
+
+  - id: MA-7.8
+    level: MUST
+    class: producer
+    statement: >-
+      The intervention lifecycle is closed both ways. A non-allow outcome carries
+      exactly one of: a performable intervention with enforcement_status
+      requested, acknowledged, applied or failed; or an advisory with
+      enforcement_status not_performable. An `allow` outcome carries neither,
+      and carries no enforcement_status other than not_required.
+    assessable: schema
+
+  - id: MA-7.9
+    level: MUST
+    class: producer
+    statement: >-
+      A directive that cannot be performed is recorded as an advisory naming what
+      it lacks, with enforcement_status not_performable, never as an intervention.
+    assessable: schema
+    test_vectors: [TV-8]
+    note: >-
+      not_performable is its own state; collapsing it into failed claims an
+      attempt not made, and into not_required claims the decision did not call
+      for the effect.
+
+  # ── Section 8 — replay ──────────────────────────────────────────────────
+  - id: MA-8.1
+    level: MUST
+    class: producer
+    statement: >-
+      A record supporting a reproducibility claim carries sufficient inputs to
+      re-derive mapping, verdict and state transition.
+    assessable: dynamic
+    test_vectors: [TV-12]
+
+  - id: MA-8.2
+    level: MUST
+    class: producer
+    statement: >-
+      Reproducibility is keyed on recorded decision inputs, never on wall-clock
+      time. A time value that affected the decision is recorded as an input.
+    assessable: static
+
+  - id: MA-8.3
+    level: MUST NOT
+    class: producer
+    statement: >-
+      A declared order enforced only by implementation structure is not described
+      as enforced. Order is an invariant only where asserted against an observed
+      execution trace.
+    assessable: static
+
+  - id: MA-8.4
+    level: MUST NOT
+    class: producer
+    statement: >-
+      A recorded payload is not modified after the fact; a revised reading is an
+      append-only revision alongside it.
+    assessable: static
+
+  # ── Section 9 — conformance claims (reflexive) ──────────────────────────
+  - id: MA-9.1
+    level: MUST
+    class: producer
+    statement: >-
+      A conformance claim resolves every cited evidence artefact and names the
+      version evaluated against. A citation that does not resolve is not
+      evidence.
+    assessable: dynamic
+    test_vectors: [TV-9]
+    note: >-
+      This requirement applies to the conformance report itself. A report citing
+      artefacts that do not resolve fails MA-9.1 whatever else it establishes.
+
+# ── Reporting ────────────────────────────────────────────────────────────
+reporting:
+  per_requirement_result:
+    enum: [PASS, FAIL, NOT_MEASURED, INCONCLUSIVE, ERROR, NOT_APPLICABLE]
+    note: >-
+      A conformance run reports one result per requirement using the same algebra
+      it assesses. A requirement whose `assessable` is `review` MUST report
+      NOT_MEASURED from an automated run.
+  aggregate:
+    prohibited: >-
+      A single overall PASS/FAIL. The counts are reported per result value, and a
+      run with any NOT_MEASURED MUST NOT be summarised as conforming.
+  position:
+    ladder: [mapped, self_assessed, self_declared_conformance,
+             independently_assessed, third_party_verified, certified]
+    reserved_term: >-
+      "verified conformance" is reserved for named independent assessment.

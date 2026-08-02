@@ -1,0 +1,14 @@
+# Measurement Axioms v1.0 — frozen artefact checksums
+#
+# Frozen 2026-08-02. Verify with:
+#   sha256sum -c CHECKSUMS.sha256
+#
+# A frozen version that cannot be checked is a claim about itself. These
+# are the five artefacts the specification names; anything else in this
+# directory is derived or incidental.
+
+e20036d6f14210bc2b05abf349ffe495a2d119854779aed6cd8f2d14c22da4d7  MEASUREMENT_AXIOMS_SPECIFICATION.md
+09c01c9995365efb08d25e198268445c71abba9a8339601cd8df02fbfaec85f8  verdict-outcome.schema.json
+118301361cb458be603201cf41f96f3a78ee51fc2f6814a67062e9d572086f93  conformance-requirements.yaml
+7fb9278b64100db55f779d3a6bce8360754af52bcdb75404b8da57f8b4b400dd  conformance/verdict.py
+3c4d9ef9479b8e6ae4170ff6b5d41d51e2a3d700121952db9c5ce8fced52becd  conformance/degenerate.py

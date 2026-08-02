@@ -1,0 +1,22 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Ali Toygar Abak
+
+The Measurement Axioms — doctrine, specification, conformance requirements,
+record schema and reference implementation.
+
+You are free to share and adapt this material for any purpose, including
+commercially, provided you give appropriate credit, link to the license, and
+indicate if changes were made.
+
+Full text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+WHY THIS LICENSE. A specification that a standards body or a competitor cannot
+adopt, adapt and re-publish is not a specification; it is marketing. The
+attribution requirement is the only condition, and it exists so that a claim of
+conformance can be traced to the text it claims conformance with.
+
+NOTE ON CONFORMANCE. This license grants no right to describe an implementation
+as conformant. Conformance is a claim about a system, assessable against
+conformance-requirements.yaml, and this document makes no assessment of any
+implementation including its authors' own.

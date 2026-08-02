@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: The Measurement Axioms
+message: >-
+  If you reference this doctrine or the specification extracted from it, please
+  cite it as below.
+type: software
+authors:
+  - given-names: Ali Toygar
+    family-names: Abak
+    orcid: https://orcid.org/0009-0002-3718-4010
+version: 1.0.0
+date-released: '2026-08-02'
+license: CC-BY-4.0
+abstract: >-
+  A governance verdict is a measurement of a claim about a system, and a
+  measurement that was not taken must not be reported as one that passed. The
+  doctrine states seven axioms and five properties of a governance measurement
+  path, defines a six-value verdict algebra with two collapse prohibitions, and
+  is accompanied by a normative specification, a machine-readable record schema,
+  conformance requirements and a reference implementation.
+keywords:
+  - AI governance
+  - assurance
+  - conformance
+  - evidence
+  - measurement validity
+references:
+  - type: report
+    title: >-
+      Phionyx self-audit against The Measurement Axioms
+    authors:
+      - given-names: Ali Toygar
+        family-names: Abak
+    date-released: '2026-08-01'
+    notes: >-
+      The doctrine applied to its own authors' runtime. Twelve findings, none
+      with verification_status pass at the time of release.
