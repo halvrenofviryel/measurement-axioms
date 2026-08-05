@@ -48,4 +48,22 @@ Baseline edition. First public release.
 - `independent_review: NOT_REQUESTED`.
 - No prevalence claim is made. Establishing that this failure class is common
   would require systems other than ours.
-- Conformance test suite: 319 tests at commit 3fd2f6ac.
+- Conformance test suite — canonical count record (corrected 2026-08-05):
+
+  ```yaml
+  release:        v1.0.0 (baseline edition)
+  commit:         0592f13  # this repository's main at the time of this correction
+  test_selection: python -m pytest tests/ -q   # the two shipped test files
+  collected:      314
+  passed:         314
+  skipped:        0
+  failed:         0
+  ```
+
+  The line this replaces said "319 tests at commit 3fd2f6ac". Both halves
+  failed their own standard: 319 is the authors' development-tree superset
+  (it adds five tests that read private paths; the shipped spec test file
+  states the omission inside itself), and the cited commit resolves in no
+  public repository — an unverifiable pointer of exactly the kind this
+  doctrine forbids counting as evidence. The public number is 314, measured
+  by running the shipped suite.
