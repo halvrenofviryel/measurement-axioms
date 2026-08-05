@@ -289,10 +289,78 @@ probe</em>, where the correction itself had been written as
 collapse it forbids.</p>
 <hr />
 <h2>Remediation</h2>
-<p>Tracked in
-<strong>an internal remediation plan, which is not published</strong>.
-No finding in this report is closed. Each carries a <code>work_status</code> and a
-<code>verification_status</code>; none has <code>verification_status: pass</code>.</p>
+<p>Tracked in an internal remediation plan, which is <strong>not published</strong>: it carries
+the authors' own migration record and release sequencing, neither of which is
+part of this doctrine. Each finding carries a <code>work_status</code> and a
+<code>verification_status</code> there.</p>
+<p>That the tracker is unpublished is itself a limit on this report, and is named
+rather than papered over with a link a reader cannot follow — this report's own
+finding #11 is a compliance mapping rating a control on citations that resolved
+to nothing. A dead pointer here would repeat it.</p>
+<h3>Status note — 2 August 2026</h3>
+<p>The sentence this section carried on 1 August — <em>"No finding in this report is
+closed"</em> — was true when written and is no longer precise. Work continued the
+next day, and a report whose value rests on its statements being true does not
+get to leave one standing past its date.</p>
+<p>What is accurate as of 2 August: <strong>no finding has <code>verification_status: pass</code>.</strong>
+Some have moved, and the movement is smaller than a reader might assume from a
+list of commits, so it is stated at the resolution it actually happened at:</p>
+<table>
+<thead>
+<tr><th>Finding</th><th>What changed</th><th>What did <strong>not</strong></th></tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>#9</strong> — audit-named stage writes no record</td>
+<td>Its exception path no longer returns a bare <code>ok</code>; it now carries <code>block_run_status: FAILED</code>, an <code>ERROR</code> measurement and <code>operating_mode: degraded</code>, and a test asserts the module still contains no signing so the four public mappings cannot silently re-acquire the claim</td>
+<td><strong>The finding stands.</strong> The remediation was "write a record or stop naming it for auditing", and neither has been done. The block still writes no <code>AuditRecord</code>, no hash chain and no signature</td>
+</tr>
+<tr>
+<td><strong>#4</strong> — unmeasured descriptor admitted with a positive reason</td>
+<td>The <code>None</code> path now returns <code>non_measurement_cause: input_absent</code> and no longer reaches the admitting branch. The sentence <em>"descriptor hash matches user-approved baseline"</em> survives only where a comparison actually ran</td>
+<td>Verification is a source reading, as everywhere else in this report</td>
+</tr>
+<tr>
+<td><strong>§2 dataflow</strong> — a safety component reading a key no producer writes</td>
+<td>Three producer→consumer key mismatches were repaired, so the revision gate's confidence, arbitration and drift rules can now fire</td>
+<td>The conflict-score wiring is <strong>not</strong> done: the metric's current formula rates agreement and disagreement in a way that would make module <em>agreement</em> rewrite responses, and changing it touches claim references. It is a founder decision, recorded as one</td>
+</tr>
+</tbody>
+</table>
+<p>A separate class of finding was produced by the same reading and is <strong>not</strong> in the
+eleven, because it was found after this report was written: the runtime's own
+canonical pipeline was audited block by block, and fabricated values were found on
+paths that report success — a midpoint published as a measurement from a crash,
+and seeded into the next turn as the previous turn's result. That work is partly
+done and partly open. It belongs in the next edition of this report rather than
+being folded into this one, because this report is anchored to 1 August and
+retro-fitting it would defeat the point of dating it.</p>
+<h3>Status note — 5 August 2026</h3>
+<p>The paragraph above said the block-by-block review of the canonical pipeline
+was "partly done and partly open". The line between the two halves is now
+clear.</p>
+<p><strong>Done.</strong> The review swept every exception handler in the pipeline's block
+modules. The handlers in the executing tiers now follow the doctrine on
+their failure paths: a failed block records <code>block_run_status: FAILED</code> with
+an <code>ERROR</code> measurement and a degraded operating mode, and a skipped block
+records <code>NOT_MEASURED</code> with its cause. The substituted values the paragraph
+above pointed at were removed from the affected paths, and each removal
+carries a regression test that fails if the substitution returns.</p>
+<p><strong>Done — enforcement.</strong> The doctrine's staged-rollout enforcement switches
+in the development harness are now all on, and the binding was measured
+against the running process rather than inferred from the source: a claim
+whose evidence type does not entail its claim type is downgraded, and a
+claim citing sources not read in the same turn is rejected. One switch is
+set but measured unreachable — the conditions that would trigger it already
+produce a non-passing directive — and it is recorded as that rather than
+counted as a control that fires.</p>
+<p><strong>Open.</strong> The archive-tier handlers, outside the executing order, are not
+yet migrated; a small set of items in the internal tracker are design
+decisions and remain with the authors. The header of this report is
+unchanged: no finding has <code>verification_status: pass</code>, the evidence bundle
+does not exist, and no independent review has been requested. The
+corrections above are visible in the public source repository and reach the
+released packages with the next release.</p>
 </main>
 
 <script>

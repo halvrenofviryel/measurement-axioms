@@ -210,3 +210,34 @@ and seeded into the next turn as the previous turn's result. That work is partly
 done and partly open. It belongs in the next edition of this report rather than
 being folded into this one, because this report is anchored to 1 August and
 retro-fitting it would defeat the point of dating it.
+
+### Status note — 5 August 2026
+
+The paragraph above said the block-by-block review of the canonical pipeline
+was "partly done and partly open". The line between the two halves is now
+clear.
+
+**Done.** The review swept every exception handler in the pipeline's block
+modules. The handlers in the executing tiers now follow the doctrine on
+their failure paths: a failed block records `block_run_status: FAILED` with
+an `ERROR` measurement and a degraded operating mode, and a skipped block
+records `NOT_MEASURED` with its cause. The substituted values the paragraph
+above pointed at were removed from the affected paths, and each removal
+carries a regression test that fails if the substitution returns.
+
+**Done — enforcement.** The doctrine's staged-rollout enforcement switches
+in the development harness are now all on, and the binding was measured
+against the running process rather than inferred from the source: a claim
+whose evidence type does not entail its claim type is downgraded, and a
+claim citing sources not read in the same turn is rejected. One switch is
+set but measured unreachable — the conditions that would trigger it already
+produce a non-passing directive — and it is recorded as that rather than
+counted as a control that fires.
+
+**Open.** The archive-tier handlers, outside the executing order, are not
+yet migrated; a small set of items in the internal tracker are design
+decisions and remain with the authors. The header of this report is
+unchanged: no finding has `verification_status: pass`, the evidence bundle
+does not exist, and no independent review has been requested. The
+corrections above are visible in the public source repository and reach the
+released packages with the next release.

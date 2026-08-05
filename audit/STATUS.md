@@ -8,7 +8,7 @@ an implication.
 ```yaml
 report:                        PHIONYX_MEASUREMENT_AXIOMS_SELF_AUDIT_2026-08-01.md
 report_date:                   2026-08-01
-status_note_added:             2026-08-02
+status_notes_added:            [2026-08-02, 2026-08-05]
 bundle_status:                 NOT_AVAILABLE
 claim_status:                  SUPPORTED_NARRATIVE
 independent_reproducibility:   NOT_MEASURED
