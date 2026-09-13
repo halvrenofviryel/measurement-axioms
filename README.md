@@ -79,6 +79,16 @@ produced by the artefact written to detect it. It is documented rather than
 quietly fixed, because a doctrine that hides its own instance of the thing it
 names has not earned the reader's attention.
 
+## From verdict validity to claim preservation
+
+The Measurement Axioms constrain what a governance component may report about
+its own measurement. A related technical note asks the downstream question:
+whether those limits survive normalization, aggregation, replay and
+publication. It is a position paper, not part of this specification, and it
+changes no v1.0 requirement or conformance condition.
+
+[Access Is Not Yet Verifiability →](https://huggingface.co/blog/phionyx/access-is-not-yet-verifiability)
+
 ## Citing
 
 ```
